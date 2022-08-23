@@ -1,0 +1,110 @@
+# Gear file for SeaOfSteves plugin
+sos:
+  gear:
+    sabre:
+      enabled: true
+      display: "&6Sabre"
+      lore:
+        - "&r&f*********"
+        - "&r&4Left Click &fto attack"
+        - "&r&7Cannot hurt Merchants"
+      slot: 0
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    longbow:
+      enabled: true
+      display: "&6Longbow"
+      lore:
+        - "&r&f*********"
+        - "&r&4Right Click &fto fire arrow"
+        - "&r&fHold &4Right Click &fto charge"
+      slot: 1
+      slot-arrow: -1
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    scoop:
+      enabled: true
+      display: "&6Scoop"
+      lore:
+        - "&r&f*********"
+        - "&r&fHold &4Left Click &fto dig"
+        - "&r&7Works best on beaches"
+      slot: 2
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    divining-rod:
+      enabled: true
+      display: "&6Divining Rod"
+      lore:
+        - "&r&f*********"
+        - "&r&fHold to locate treasure"
+        - "&r&7Only works on beaches"
+      slot: 3
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    ship:
+      enabled: true
+      display: "&6Ship"
+      lore:
+        - "&r&f*********"
+        - "&r&4Left Click &fto change"
+        - "&r&4Right Click &fto launch"
+      slot: 4
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    fireball:
+      enabled: true
+      display: "&6Fireball"
+      lore:
+        - "&r&f*********"
+        - "&r&4Right Click &fto fire"
+        - "&r&7Only works aboard ships"
+      slot: 5
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    spyglass:
+      enabled: true
+      display: "&6Spyglass"
+      lore:
+        - "&r&f*********"
+        - "&r&4Right Click &fto spy"
+      slot: 6
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    surveyor:
+      enabled: true
+      display: "&6Surveyor"
+      lore:
+        - "&r&f*********"
+        - "&r&4Right Click &fto find village"
+        - "&r&7Only works aboard ships"
+      slot: 7
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    fishing-rod:
+      enabled: true
+      display: "&6Fishing Rod"
+      lore:
+        - "&r&f*********"
+        - "&r&4Right Click &fto cast"
+      slot: 8
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    pickaxe:
+      enabled: false
+      display: "&6Pickaxe"
+      lore:
+        - "&r&f*********"
+        - "&r&4Right Click &fto mine"
+      slot: 5
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+  gear-naval:
+    slot-0:
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    slot-1:
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    slot-2:
+      mythic: "VOTSMediumShipRepairWeak"
+    slot-3:
+      mythic: "VOTSDirectionControler"
+    slot-4:
+      mythic: "VOTSSpecialControler"
+    slot-5:
+      mythic: "VOTSAmmoCannonBall"
+    slot-6:
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    slot-7:
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+    slot-8:
+      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"

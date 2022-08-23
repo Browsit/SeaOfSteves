@@ -1,0 +1,11 @@
+# Probability file for Sea of Steves (ex. value of 250 means 1/250 chance)
+sos:
+  ocean:
+    spawn-drowned: 65
+    spawn-vots-npc: 250
+  island:
+    spawn-skeleton-with-bow: 10
+    spawn-captain: 5
+  volcano:
+    spawn-magma-cube: 40
+    spawn-tephra: 50

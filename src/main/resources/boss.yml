@@ -1,0 +1,14 @@
+# Boss file for SeaOfSteves plugin
+sos:
+  boss:
+    king-blaze:
+      enabled: true
+      biome: VOLCANO_PIT
+      name: "King Blaze"
+      drop: BLAZE_ROD
+      health: 50.0
+      respawn: 900000
+      scale: 4.0
+      use-bossbar: true
+      use-nametag: true
+      mythic: "NAME_OF_MOB_TO_USE_INSTEAD"

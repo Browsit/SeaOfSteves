@@ -1,0 +1,35 @@
+# Configuration file for SeaOfSteves plugin
+sos:
+  creatures:
+    enabled: true
+    name-captain: "Captain"
+  eruption:
+    enabled: true
+    material: MAGMA_BLOCK
+    start-height: 30
+    cancel-drop: true
+  general:
+    block-explode: false
+  merchants:
+    enabled: true
+    name: "Merchant"
+    reward: 10
+    use-vault: false
+  multiverse-reset:
+    enabled: true
+    use-bossbar: true
+    regen-hours: 720.0
+    purge-dynmap: true
+  phatloot:
+    enabled: true
+    name-barrel: "SampleLoot"
+    name-chest: "SampleLoot"
+  vots:
+    enabled: true
+    ships:
+      - Catamaran
+      - Galleon
+      - Frigate
+  worlds:
+    - world_name
+    - world_name2

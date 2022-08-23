@@ -1,0 +1,28 @@
+name: SeaOfSteves
+version: 0.0.1
+description: Pirate gameplay plugin for Minecraft servers.
+folia-supported: true
+api-version: 1.20.5
+author: Browsit
+website: https://github.com/Browsit/SeaOfSteves
+
+main: org.browsit.seaofsteves.SeaOfSteves
+softdepend: [dynmap, ModelEngine, Multiverse-Core, MythicCrucible, MythicMobs, Terra, PhatLoots, PlaceholderAPI, Vault]
+
+commands:
+  sos:
+    description: Plugin information
+    permission: seaofsteves.sos
+permissions:
+  seaofsteves.sos:
+    description: Plugin information
+    default: true
+  seaofsteves.sos.reload:
+    description: Reload plugin data
+    default: op
+  seaofsteves.sos.tephra:
+    description: Spawn tephra at location
+    default: op
+  seaofsteves.sos.top:
+    description: List top gold earners
+    default: true

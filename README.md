@@ -1,17 +1,19 @@
+![Banner](https://browsit.org/external/frigate_banner_thin.png)
+
 # SeaOfSteves
-Sea of Steves is the ocean adventure gameplay plugin where you hunt (and fight) for treasure! **It is designed to be used with a predominantly water-based islands map or generator.** We highly recommend [Isles of Alex](https://lectern.browsit.org/resources/resource/51/).
+Sea of Steves is the ocean adventure gameplay plugin where you hunt (and fight) for treasure! **It is designed to be used with a predominantly water-based islands map or generator.** We highly recommend [Isles of Alex](https://lectern.browsit.org/resources/resource/51/). Custom ships are _optional_ through [Voyage of the Seas](https://elitecreatures.com/shop/transportation/voyage-of-the-seas/?sld=browsitllc).
 
 ### PIRATE’S HONOR
 
-All new sailors receive the same set of tools, including a sharp blade. No handouts here – all seafarers must rely on skill to prove they’re a cut above the rest!
+All new sailors receive the same set of tools, including a sharp blade. Each seafarer must rely on skill to prove they’re a cut above the rest!
 
 ### HIDDEN RICHES
 
-Search for buried treasures along the sandy shores! Use your trusty divining rod to locate their exact position, but watch out – some of those chests are booby trapped! Sell your haul to merchants to get your name spread far and wide.
+Search for buried treasures along the sandy shores! Use your trusty divining rod to locate their exact position, but watch out—some of those chests are booby trapped! Sell your haul to merchants to get your name spread far and wide.
 
 ### TREACHEROUS WATERS
 
-The ocean can be a scary place, but you brought firepower! Defend your booty from other raiders while sailing in your trusty vessel, but be warned – the depths beneath aren’t kind to strangers.
+The ocean can be a scary place, but you brought firepower! Defend your booty from other raiders while sailing in your trusty vessel. Just be wary: the depths beneath aren’t kind to strangers.
 
 ### Recommended dependencies:
 - [Multiverse-Core](https://github.com/Multiverse/Multiverse-Core) (world reset)

@@ -1,11 +1,11 @@
 ![Banner](https://browsit.org/external/frigate_banner_thin.png)
 
 # SeaOfSteves
-Sea of Steves is the ocean adventure gameplay plugin where you hunt (and fight) for treasure! **It is designed to be used with a predominantly water-based islands map or generator.** We highly recommend [Isles of Alex](https://lectern.browsit.org/resources/resource/51/). Custom ships are _optional_ through [Voyage of the Seas](https://elitecreatures.com/shop/transportation/voyage-of-the-seas/?sld=browsitllc).
+Sea of Steves is the ocean adventure gameplay plugin where you hunt (and fight) for treasure! **It is designed to be used with a predominantly water-based islands map or generator.** We humbly recommend [Isles of Alex](https://lectern.browsit.org/resources/resource/51/). Custom ships are _optional_ through [Voyage of the Seas](https://elitecreatures.com/shop/transportation/voyage-of-the-seas/?sld=browsitllc).
 
 ### PIRATE’S HONOR
 
-All new sailors receive the same set of tools, including a sharp blade. Each seafarer must rely on skill to prove they’re a cut above the rest!
+All new sailors receive the same set of tools, including a sharp blade. Each seafarer must rely on skill to prove they’re a cut above the rest! Default gear can be replaced with [MythicMobs](https://mythiccraft.io/index.php?pages/official-mythicmobs-download/) items, if desired.
 
 ### HIDDEN RICHES
 

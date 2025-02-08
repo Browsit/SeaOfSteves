@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class IO {
     private static FileConfiguration bosses;
-    private static FileConfiguration items;
+    private static FileConfiguration gear;
     private static final ConcurrentHashMap<String, String> strings = new ConcurrentHashMap<>();
 
     public static void save(final SeaOfSteves plugin, final String fileName) throws IOException {
@@ -63,8 +63,8 @@ public class IO {
                 bosses.options().setHeader(Collections.singletonList("Boss file for SeaOfSteves plugin"));
             }
             case "gear.yml" -> {
-                items = config;
-                items.options().setHeader(Collections.singletonList("Gear file for SeaOfSteves plugin (not for VOTS items)"));
+                gear = config;
+                gear.options().setHeader(Collections.singletonList("Gear file for SeaOfSteves plugin (not for VOTS items)"));
             }
             case "strings.yml" -> {
                 for (final String key : config.getKeys(false)) {
@@ -78,8 +78,8 @@ public class IO {
         return bosses;
     }
 
-    public static FileConfiguration getItems() {
-        return items;
+    public static FileConfiguration getGear() {
+        return gear;
     }
 
     public static String getLang(final String key) {

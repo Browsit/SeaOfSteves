@@ -495,7 +495,7 @@ public class GearSettings {
     }
 
     public void load() {
-        final FileConfiguration cfg = IO.getItems();
+        final FileConfiguration cfg = IO.getGear();
         sabreEnabled = cfg.getBoolean("sos.gear.sabre.enabled", true);
         sabreDisplay = translate(cfg.getString("sos.gear.sabre.display", "&6Sabre"));
         sabreLore = translateList(cfg.getStringList("sos.gear.sabre.lore"));

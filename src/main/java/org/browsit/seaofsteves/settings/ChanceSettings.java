@@ -76,7 +76,7 @@ public class ChanceSettings {
     }
 
     public void load() {
-        final FileConfiguration cfg = IO.getItems();
+        final FileConfiguration cfg = IO.getGear();
         oceanSpawnDrowned = cfg.getInt("sos.ocean.spawn-drowned", 65);
         oceanSpawnVotsNpc = cfg.getInt("sos.ocean.spawn-vots-npc", 250);
         islandSpawnSkeletonWithBow = cfg.getInt("sos.ocean.spawn-skeleton-with-bow", 10);

@@ -88,58 +88,58 @@ public class ItemUtil {
                 || PirateArrow.equals(itemStack);
     }
 
-    public static String getGearDisplay(Class<?> gear) {
+    public static String getGearDisplay(Class<?> gearClazz) {
         if (plugin == null) return "";
-        final GearSettings items = plugin.getGearSettings();
-        if (PirateSabre.class.isAssignableFrom(gear)) {
-            return items.getSabreDisplay();
-        } else if (PirateLongbow.class.isAssignableFrom(gear)) {
-            return items.getLongbowDisplay();
-        } else if (PirateScoop.class.isAssignableFrom(gear)) {
-            return items.getScoopDisplay();
-        } else if (PirateDiviningRod.class.isAssignableFrom(gear)) {
-            return items.getDiviningRodDisplay();
-        } else if (PirateDingy.class.isAssignableFrom(gear)) {
-            return items.getDingyDisplay();
-        } else if (PirateSpyglass.class.isAssignableFrom(gear)) {
-            return items.getSpyglassDisplay();
-        } else if (PirateFireball.class.isAssignableFrom(gear)) {
-            return items.getFireballDisplay();
-        } else if (PirateSurveyor.class.isAssignableFrom(gear)) {
-            return items.getSurveyorDisplay();
-        } else if (PirateFishingRod.class.isAssignableFrom(gear)) {
-            return items.getFishingRodDisplay();
-        } else if (PiratePickaxe.class.isAssignableFrom(gear)) {
-            return items.getPickaxeDisplay();
-        } else if (PirateArrow.class.isAssignableFrom(gear)) {
+        final GearSettings gear = plugin.getGearSettings();
+        if (PirateSabre.class.isAssignableFrom(gearClazz)) {
+            return gear.getSabreDisplay();
+        } else if (PirateLongbow.class.isAssignableFrom(gearClazz)) {
+            return gear.getLongbowDisplay();
+        } else if (PirateScoop.class.isAssignableFrom(gearClazz)) {
+            return gear.getScoopDisplay();
+        } else if (PirateDiviningRod.class.isAssignableFrom(gearClazz)) {
+            return gear.getDiviningRodDisplay();
+        } else if (PirateDingy.class.isAssignableFrom(gearClazz)) {
+            return gear.getDingyDisplay();
+        } else if (PirateSpyglass.class.isAssignableFrom(gearClazz)) {
+            return gear.getSpyglassDisplay();
+        } else if (PirateFireball.class.isAssignableFrom(gearClazz)) {
+            return gear.getFireballDisplay();
+        } else if (PirateSurveyor.class.isAssignableFrom(gearClazz)) {
+            return gear.getSurveyorDisplay();
+        } else if (PirateFishingRod.class.isAssignableFrom(gearClazz)) {
+            return gear.getFishingRodDisplay();
+        } else if (PiratePickaxe.class.isAssignableFrom(gearClazz)) {
+            return gear.getPickaxeDisplay();
+        } else if (PirateArrow.class.isAssignableFrom(gearClazz)) {
             return ChatColor.GOLD + "Arrow";
         }
         return "";
     }
 
-    public static List<String> getGearLore(Class<?> gear) {
+    public static List<String> getGearLore(Class<?> gearClazz) {
         if (plugin == null) return Collections.emptyList();
-        final GearSettings items = plugin.getGearSettings();
-        if (PirateSabre.class.isAssignableFrom(gear)) {
-            return items.getSabreLore();
-        } else if (PirateLongbow.class.isAssignableFrom(gear)) {
-            return items.getLongbowLore();
-        } else if (PirateScoop.class.isAssignableFrom(gear)) {
-            return items.getScoopLore();
-        } else if (PirateDiviningRod.class.isAssignableFrom(gear)) {
-            return items.getDiviningRodLore();
-        } else if (PirateDingy.class.isAssignableFrom(gear)) {
-            return items.getDingyLore();
-        } else if (PirateSpyglass.class.isAssignableFrom(gear)) {
-            return items.getSpyglassLore();
-        } else if (PirateFireball.class.isAssignableFrom(gear)) {
-            return items.getFireballLore();
-        } else if (PirateSurveyor.class.isAssignableFrom(gear)) {
-            return items.getSurveyorLore();
-        } else if (PirateFishingRod.class.isAssignableFrom(gear)) {
-            return items.getFishingRodLore();
-        } else if (PiratePickaxe.class.isAssignableFrom(gear)) {
-            return items.getPickaxeLore();
+        final GearSettings gear = plugin.getGearSettings();
+        if (PirateSabre.class.isAssignableFrom(gearClazz)) {
+            return gear.getSabreLore();
+        } else if (PirateLongbow.class.isAssignableFrom(gearClazz)) {
+            return gear.getLongbowLore();
+        } else if (PirateScoop.class.isAssignableFrom(gearClazz)) {
+            return gear.getScoopLore();
+        } else if (PirateDiviningRod.class.isAssignableFrom(gearClazz)) {
+            return gear.getDiviningRodLore();
+        } else if (PirateDingy.class.isAssignableFrom(gearClazz)) {
+            return gear.getDingyLore();
+        } else if (PirateSpyglass.class.isAssignableFrom(gearClazz)) {
+            return gear.getSpyglassLore();
+        } else if (PirateFireball.class.isAssignableFrom(gearClazz)) {
+            return gear.getFireballLore();
+        } else if (PirateSurveyor.class.isAssignableFrom(gearClazz)) {
+            return gear.getSurveyorLore();
+        } else if (PirateFishingRod.class.isAssignableFrom(gearClazz)) {
+            return gear.getFishingRodLore();
+        } else if (PiratePickaxe.class.isAssignableFrom(gearClazz)) {
+            return gear.getPickaxeLore();
         }
         return Collections.emptyList();
     }
@@ -148,41 +148,41 @@ public class ItemUtil {
         if (!WorldUtil.isAllowedWorld(player.getWorld().getName())) {
             return;
         }
-        final GearSettings items = plugin.getGearSettings();
-        if (items.isSabreEnabled()) {
-            player.getInventory().setItem(items.getSabreSlot(), PirateSabre.get(player));
+        final GearSettings gear = plugin.getGearSettings();
+        if (gear.isSabreEnabled()) {
+            player.getInventory().setItem(gear.getSabreSlot(), PirateSabre.get(player));
         }
-        if (items.isLongbowEnabled()) {
-            player.getInventory().setItem(items.getLongbowSlot(), PirateLongbow.get(player));
+        if (gear.isLongbowEnabled()) {
+            player.getInventory().setItem(gear.getLongbowSlot(), PirateLongbow.get(player));
         }
-        if (items.isScoopEnabled()) {
-            player.getInventory().setItem(items.getScoopSlot(), PirateScoop.get(player));
+        if (gear.isScoopEnabled()) {
+            player.getInventory().setItem(gear.getScoopSlot(), PirateScoop.get(player));
         }
-        if (items.isDiviningRodEnabled()) {
-            player.getInventory().setItem(items.getDiviningRodSlot(), PirateDiviningRod.get(player));
+        if (gear.isDiviningRodEnabled()) {
+            player.getInventory().setItem(gear.getDiviningRodSlot(), PirateDiviningRod.get(player));
         }
-        if (items.isDingyEnabled()) {
+        if (gear.isDingyEnabled()) {
             if (!player.isInsideVehicle() && allowShip) {
-                player.getInventory().setItem(items.getDingySlot(), PirateDingy.get(player));
+                player.getInventory().setItem(gear.getDingySlot(), PirateDingy.get(player));
                 player.setCooldown(PirateDingy.get(player).getType(), 180);
             } else {
-                player.getInventory().setItem(items.getDingySlot(), PirateEmpty.get(player));
+                player.getInventory().setItem(gear.getDingySlot(), PirateEmpty.get(player));
             }
         }
-        if (items.isFireballEnabled()) {
-            player.getInventory().setItem(items.getFireballSlot(), PirateFireball.get(player));
+        if (gear.isFireballEnabled()) {
+            player.getInventory().setItem(gear.getFireballSlot(), PirateFireball.get(player));
         }
-        if (items.isSpyglassEnabled()) {
-            player.getInventory().setItem(items.getSpyglassSlot(), PirateSpyglass.get(player));
+        if (gear.isSpyglassEnabled()) {
+            player.getInventory().setItem(gear.getSpyglassSlot(), PirateSpyglass.get(player));
         }
-        if (items.isSurveyorEnabled()) {
-            player.getInventory().setItem(items.getSurveyorSlot(), PirateSurveyor.get(player));
+        if (gear.isSurveyorEnabled()) {
+            player.getInventory().setItem(gear.getSurveyorSlot(), PirateSurveyor.get(player));
         }
-        if (items.isFishingRodEnabled()) {
-            player.getInventory().setItem(items.getFishingRodSlot(), PirateFishingRod.get(player));
+        if (gear.isFishingRodEnabled()) {
+            player.getInventory().setItem(gear.getFishingRodSlot(), PirateFishingRod.get(player));
         }
-        if (items.isPickaxeEnabled()) {
-            player.getInventory().setItem(items.getPickaxeSlot(), PiratePickaxe.get(player));
+        if (gear.isPickaxeEnabled()) {
+            player.getInventory().setItem(gear.getPickaxeSlot(), PiratePickaxe.get(player));
         }
     }
 
@@ -208,7 +208,7 @@ public class ItemUtil {
             final ItemStack mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack(item);
             // Set position
             player.getInventory().setItem(slot, mythic);
-            final int finalSlot = slot;
+            /*final int finalSlot = slot;
             plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
                 // Override skill items
                 final ItemStack i = player.getInventory().getItem(finalSlot);
@@ -218,10 +218,10 @@ public class ItemUtil {
                         player.getInventory().setItem(finalSlot, mythic);
                     }
                 } else {
-                    plugin.getLogger().severe("Mythic naval gear " + item + "does not exist!");
+                    plugin.getLogger().severe("Mythic naval gear " + item + " does not exist!");
                     IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.RED + IO.getLang("problemOccurred"));
                 }
-            }, 20L);
+            }, 20L);*/
         }
     }
 

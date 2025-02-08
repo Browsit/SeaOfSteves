@@ -25,6 +25,7 @@ import io.lumine.mythic.core.skills.SkillTriggers;
 import net.md_5.bungee.api.ChatMessageType;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.depend.Dependencies;
+import org.browsit.seaofsteves.gear.type.PirateEmpty;
 import org.browsit.seaofsteves.settings.ConfigSettings;
 import org.browsit.seaofsteves.settings.GearSettings;
 import org.browsit.seaofsteves.util.EntityUtil;
@@ -62,8 +63,6 @@ public class MythicListener implements Listener {
         this.gear = plugin.getGearSettings();
         this.foliaLib = plugin.getFoliaLib();
     }
-
-    // TODO find way to cancel controllers
 
     @EventHandler
     public void onVehiclePlace(final EntityPlaceEvent event) {
@@ -113,13 +112,7 @@ public class MythicListener implements Listener {
             final SkillMetadataImpl meta = new SkillMetadataImpl(SkillTriggers.API, c, bukkitEntity);
             opt.get().execute(meta);
         }
-        // TODO find way to prevent controllers within hotbar instead
-        // Set position so controllers stay within hotbar
-        ItemUtil.renewGearNaval(event.getPlayer(), shipType);
-        // Wipe hotbar
-        foliaLib.getScheduler().runAtEntityLater(player, () -> {
-            ItemUtil.renewGear(event.getPlayer(), false);
-        }, 20L);
+        player.getInventory().setItem(gear.getDingySlot(), PirateEmpty.get(player));
     }
 
     @EventHandler

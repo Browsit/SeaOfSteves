@@ -6,7 +6,7 @@
 
     <groupId>org.browsit.seaofsteves</groupId>
     <artifactId>SeaOfSteves</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.3-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -80,7 +80,12 @@
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
-            <!-- FoliaLib, MobChipLite, PhatLoots -->
+            <!-- FoliaLib -->
+            <id>tcoded-releases</id>
+            <url>https://repo.tcoded.com/releases</url>
+        </repository>
+        <repository>
+            <!-- MobChipLite, PhatLoots -->
             <id>jitpack.io</id>
             <url>https://www.jitpack.io</url>
         </repository>
@@ -141,7 +146,7 @@
         <dependency>
             <groupId>com.github.datatags.MobChipLite</groupId>
             <artifactId>mobchip-bukkit</artifactId>
-            <version>1.10.8</version>
+            <version>1.10.13</version>
         </dependency>
         <dependency>
             <groupId>com.ticxo.modelengine</groupId>
@@ -149,7 +154,6 @@
             <version>R4.0.7</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>io.lumine</groupId>
             <artifactId>MythicCrucible-Dist</artifactId>
@@ -181,9 +185,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.technicallycoded</groupId>
+            <groupId>com.tcoded</groupId>
             <artifactId>FoliaLib</artifactId>
-            <version>0.4.3</version>
+            <version>0.5.1</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>

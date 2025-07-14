@@ -40,6 +40,7 @@ import org.browsit.seaofsteves.gear.type.hand.PirateDiviningRod;
 import org.browsit.seaofsteves.gear.type.hand.PirateFishingRod;
 import org.browsit.seaofsteves.player.Pirate;
 import org.browsit.seaofsteves.settings.BossSettings;
+import org.browsit.seaofsteves.settings.ChanceSettings;
 import org.browsit.seaofsteves.settings.ConfigSettings;
 import org.browsit.seaofsteves.settings.GearSettings;
 import org.browsit.seaofsteves.util.IO;
@@ -103,6 +104,7 @@ public class PlayerListener implements Listener {
     private final SeaOfSteves plugin;
     private final Dependencies depends;
     private final BossSettings bosses;
+    private final ChanceSettings chance;
     private final ConfigSettings config;
     private final GearSettings gear;
     private final FoliaLib foliaLib;
@@ -119,6 +121,7 @@ public class PlayerListener implements Listener {
         this.plugin = plugin;
         this.depends = plugin.getDependencies();
         this.bosses = plugin.getBossSettings();
+        this.chance = plugin.getChanceSettings();
         this.config = plugin.getConfigSettings();
         this.gear = plugin.getGearSettings();
         this.foliaLib = plugin.getFoliaLib();
@@ -585,16 +588,13 @@ public class PlayerListener implements Listener {
             if (biome == null) {
                 return;
             }
-            if (biome.equals(Biome.DEEP_LUKEWARM_OCEAN)|| biome.equals(Biome.DEEP_FROZEN_OCEAN)
-                    || biome.equals(Biome.DEEP_COLD_OCEAN) || biome.equals(Biome.DEEP_OCEAN)
-                    || biome.equals(Biome.WARM_OCEAN) || biome.equals(Biome.FROZEN_OCEAN)
-                    || biome.equals(Biome.COLD_OCEAN) || biome.equals(Biome.OCEAN)
-                    || biome.equals(Biome.FROZEN_RIVER) || biome.equals(Biome.RIVER)) {
+            if (isWaterBiome(biome)) {
                 for (final Entity e : player.getNearbyEntities(4, 4, 4)) {
                     if (e instanceof Zombie) {
                         if (VOTS_TYPE.contains(ChatColor.stripColor(e.getName())) && !e.isCustomNameVisible()
                                 && e.getTrackedBy().contains(player)) {
                             isInOrOnVotsShip = true;
+                            break;
                         }
                     }
                 }
@@ -602,27 +602,7 @@ public class PlayerListener implements Listener {
                     if (depends.getMythicMobs() != null && depends.getMythicMobs().getItemManager().isMythicItem(hand)) {
                         final String mythic = depends.getMythicMobs().getItemManager().getMythicTypeFromItem(hand);
                         if (mythic.equals("VOTSDirectionControler")) {
-                            // Chance of spawning enemy VOTS NPC
-                            if (random.nextInt(250) == 1) {
-                                foliaLib.getScheduler().runAtEntityLater(player, () -> {
-                                    final Location loc = player.getLocation();
-                                    final Vector inverseDirectionVec = loc.getDirection().normalize().multiply(-20);
-                                    loc.add(inverseDirectionVec);
-                                    loc.setY(60.0); // Below ocean surface
-                                    if (loc.getBlock().isLiquid()) {
-                                        // Spawn sound
-                                        final Optional<Skill> opt = plugin.getDependencies().getMythicMobs().getSkillManager().getSkill("VOTSNPCGalleonShipDeathSound");
-                                        if (opt.isPresent()) {
-                                            final BukkitEntity bukkitEntity = new BukkitEntity(player);
-                                            final SkillCaster c = plugin.getDependencies().getMythicMobs().getSkillManager().getCaster(bukkitEntity);
-                                            final SkillMetadataImpl meta = new SkillMetadataImpl(SkillTriggers.API, c, bukkitEntity);
-                                            opt.get().execute(meta);
-                                        }
-                                        plugin.getDependencies().getMythicMobs().getMobManager().spawnMob("VOTSNPCGalleon", loc);
-                                        IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.RED + IO.getLang("enemyVesselChase"));
-                                    }
-                                }, 40L);
-                            }
+                            rollForEnemyVotsShipSpawn(player);
                             return;
                         }
                     }
@@ -743,6 +723,27 @@ public class PlayerListener implements Listener {
                     //player.getInventory().setItemInMainHand(hand);
                 }
             }
+
+            final Biome biome = TerraUtil.getBukkitBiome(event.getPlayer().getLocation());
+            if (biome == null) {
+                return;
+            }
+            if (isWaterBiome(biome)) {
+                for (final Entity e : player.getNearbyEntities(4, 4, 4)) {
+                    if (e instanceof Zombie) {
+                        if (VOTS_TYPE.contains(ChatColor.stripColor(e.getName())) && !e.isCustomNameVisible()
+                                && e.getTrackedBy().contains(player)) {
+                            if (depends.getMythicMobs() != null && depends.getMythicMobs().getItemManager().isMythicItem(hand)) {
+                                final String mythic = depends.getMythicMobs().getItemManager().getMythicTypeFromItem(hand);
+                                if (mythic.equals("VOTSDirectionControler")) {
+                                    rollForEnemyVotsShipSpawn(player);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -839,5 +840,36 @@ public class PlayerListener implements Listener {
             vehicle.remove();
         }
         plugin.removePirate(pirate);
+    }
+
+    private boolean isWaterBiome(final Biome biome) {
+        return biome.equals(Biome.DEEP_LUKEWARM_OCEAN) || biome.equals(Biome.DEEP_FROZEN_OCEAN)
+                || biome.equals(Biome.DEEP_COLD_OCEAN) || biome.equals(Biome.DEEP_OCEAN)
+                || biome.equals(Biome.WARM_OCEAN) || biome.equals(Biome.FROZEN_OCEAN)
+                || biome.equals(Biome.COLD_OCEAN) || biome.equals(Biome.OCEAN)
+                || biome.equals(Biome.FROZEN_RIVER) || biome.equals(Biome.RIVER);
+    }
+
+    private void rollForEnemyVotsShipSpawn(final Player player) {
+        if (random.nextInt(chance.getOceanSpawnVotsNpc()) == 1) {
+            foliaLib.getScheduler().runAtEntityLater(player, () -> {
+                final Location loc = player.getLocation();
+                final Vector inverseDirectionVec = loc.getDirection().normalize().multiply(-20);
+                loc.add(inverseDirectionVec);
+                loc.setY(60.0); // Below ocean surface
+                if (loc.getBlock().isLiquid()) {
+                    // Spawn sound
+                    final Optional<Skill> opt = plugin.getDependencies().getMythicMobs().getSkillManager().getSkill("VOTSNPCGalleonShipDeathSound");
+                    if (opt.isPresent()) {
+                        final BukkitEntity bukkitEntity = new BukkitEntity(player);
+                        final SkillCaster c = plugin.getDependencies().getMythicMobs().getSkillManager().getCaster(bukkitEntity);
+                        final SkillMetadataImpl meta = new SkillMetadataImpl(SkillTriggers.API, c, bukkitEntity);
+                        opt.get().execute(meta);
+                    }
+                    plugin.getDependencies().getMythicMobs().getMobManager().spawnMob("VOTSNPCGalleon", loc);
+                    IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.RED + IO.getLang("enemyVesselChase"));
+                }
+            }, 40L);
+        }
     }
 }

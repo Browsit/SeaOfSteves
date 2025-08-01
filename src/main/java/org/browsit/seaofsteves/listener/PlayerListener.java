@@ -240,9 +240,9 @@ public class PlayerListener implements Listener {
                         final EntityAI target = brain.getTargetAI();
                         final PathfinderMeleeAttack meleeAttack = new PathfinderMeleeAttack(shark, 1.0);
                         target.put(meleeAttack, 0);
-                    } catch (final Exception e) {
-                        e.printStackTrace();
+                    } catch (final NoClassDefFoundError e) {
                         shark.remove();
+                        plugin.getLogger().warning("Sharks are not yet supported on this server version!");
                     }
 
                     lastEnteredOcean.put(player.getUniqueId(), System.currentTimeMillis() - 11001L);

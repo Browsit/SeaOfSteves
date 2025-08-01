@@ -6,7 +6,7 @@
 
     <groupId>org.browsit.seaofsteves</groupId>
     <artifactId>SeaOfSteves</artifactId>
-    <version>0.0.3-SNAPSHOT</version>
+    <version>0.0.4-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -146,7 +146,7 @@
         <dependency>
             <groupId>com.github.datatags.MobChipLite</groupId>
             <artifactId>mobchip-bukkit</artifactId>
-            <version>1.10.13</version>
+            <version>1.10.14</version>
         </dependency>
         <dependency>
             <groupId>com.ticxo.modelengine</groupId>

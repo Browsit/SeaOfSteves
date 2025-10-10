@@ -25,6 +25,10 @@ public class ConfigSettings {
     private String eruptionMaterial;
     private int eruptionStartHeight;
     private boolean eruptionCancelDrop;
+    private boolean fishmongerEnabled;
+    private String fishmongerName;
+    private int fishmongerReward;
+    private boolean fishmongerUseVault;
     private boolean generalBlockExplode;
     private boolean merchantEnabled;
     private String merchantName;
@@ -91,6 +95,38 @@ public class ConfigSettings {
 
     public void setEruptionCancelDrop(final boolean eruptionCancelDrop) {
         this.eruptionCancelDrop = eruptionCancelDrop;
+    }
+
+    public boolean isFishmongerEnabled() {
+        return fishmongerEnabled;
+    }
+
+    public void setFishmongerEnabled(final boolean fishmongerEnabled) {
+        this.fishmongerEnabled = fishmongerEnabled;
+    }
+
+    public String getFishmongerName() {
+        return fishmongerName;
+    }
+
+    public void setFishmongerName(final String fishmongerName) {
+        this.fishmongerName = fishmongerName;
+    }
+
+    public int getFishmongerReward() {
+        return fishmongerReward;
+    }
+
+    public void setFishmongerReward(final int fishmongerReward) {
+        this.fishmongerReward = fishmongerReward;
+    }
+
+    public boolean canFishmongerUseVault() {
+        return fishmongerUseVault;
+    }
+
+    public void setFishmongerUseVault(final boolean fishmongerUseVault) {
+        this.merchantUseVault = fishmongerUseVault;
     }
 
     public boolean canGeneralBlockExplode() {
@@ -224,10 +260,14 @@ public class ConfigSettings {
         eruptionMaterial = cfg.getString("sos.eruption.material", "MAGMA_BLOCK");
         eruptionStartHeight = cfg.getInt("sos.eruption.start-height", 30);
         eruptionCancelDrop = cfg.getBoolean("sos.eruption.cancel-drop", true);
+        fishmongerEnabled = cfg.getBoolean("sos.fishmongers.enabled", true);
+        fishmongerName = cfg.getString("sos.fishmongers.name", "Fishmonger");
+        fishmongerReward = cfg.getInt("sos.fishmongers.reward", 2);
+        fishmongerUseVault = cfg.getBoolean("sos.fishmongers.use-vault", false);
         generalBlockExplode = cfg.getBoolean("sos.general.block-explode", false);
         merchantEnabled = cfg.getBoolean("sos.merchants.enabled", true);
         merchantName = cfg.getString("sos.merchants.name", "Merchant");
-        merchantReward = cfg.getInt("sos.merchants.reward", 100);
+        merchantReward = cfg.getInt("sos.merchants.reward", 10);
         merchantUseVault = cfg.getBoolean("sos.merchants.use-vault", false);
         multiverseResetEnabled = cfg.getBoolean("sos.multiverse-reset.enabled", true);
         multiverseResetUseBossbar = cfg.getBoolean("sos.multiverse-reset.use-bossbar", true);

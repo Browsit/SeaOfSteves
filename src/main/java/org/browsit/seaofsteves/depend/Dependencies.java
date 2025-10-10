@@ -12,6 +12,7 @@ package org.browsit.seaofsteves.depend;
 
 import com.codisimus.plugins.phatloots.PhatLoots;
 import com.dfsek.terra.bukkit.TerraBukkitPlugin;
+import com.oheers.fish.api.plugin.EMFPlugin;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import io.lumine.mythic.api.skills.Skill;
 import io.lumine.mythic.bukkit.MythicBukkit;
@@ -20,6 +21,7 @@ import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.browsit.seaofsteves.SeaOfSteves;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.Objects;
@@ -28,6 +30,7 @@ import java.util.Optional;
 public class Dependencies {
     private final SeaOfSteves plugin;
     private static Economy economy = null;
+    private static EMFPlugin evenMoreFish = null;
     private static MultiverseCore multiverse = null;
     private static Permission permission = null;
     private static PhatLoots phatLoots = null;
@@ -59,6 +62,13 @@ public class Dependencies {
         return permission;
     }
 
+    public EMFPlugin getEvenMoreFish() {
+        if (evenMoreFish == null && isPluginAvailable("EvenMoreFish")) {
+            evenMoreFish = EMFPlugin.getInstance();
+        }
+        return evenMoreFish;
+    }
+
     public MultiverseCore getMultiverseCore() {
         if (multiverse == null && isPluginAvailable("Multiverse-Core")) {
             multiverse = (MultiverseCore) plugin.getServer().getPluginManager().getPlugin("Multiverse-Core");
@@ -76,6 +86,9 @@ public class Dependencies {
     public MythicBukkit getMythicMobs() {
         if (mythicMobs == null && isPluginAvailable("MythicMobs")) {
             mythicMobs = MythicBukkit.inst();
+
+            // TODO add gemshorn
+            final ItemStack dir = mythicMobs.getItemManager().getItemStack("VOTSDirectionControler");
         }
         return mythicMobs;
     }

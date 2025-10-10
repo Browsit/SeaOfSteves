@@ -207,6 +207,9 @@ public class ItemUtil {
             }
             final ItemStack mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack(item);
             // Set position
+            if (mythic == null) {
+                plugin.getLogger().severe("Unknown mythic gear " + item);
+            }
             player.getInventory().setItem(slot, mythic);
             /*final int finalSlot = slot;
             plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {

@@ -6,7 +6,7 @@
 
     <groupId>org.browsit.seaofsteves</groupId>
     <artifactId>SeaOfSteves</artifactId>
-    <version>0.0.4-SNAPSHOT</version>
+    <version>0.0.5-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -65,6 +65,11 @@
 
     <repositories>
         <repository>
+            <!-- EvenMoreFish -->
+            <id>evenmorefish</id>
+            <url>https://repo.codemc.io/repository/EvenMoreFish</url>
+        </repository>
+        <repository>
             <!-- Terra -->
             <id>CodeMC</id>
             <url>https://repo.codemc.io/repository/maven-public/</url>
@@ -74,6 +79,7 @@
             <id>OnARandomBox</id>
             <url>https://repo.onarandombox.com/content/groups/public/</url>
         </repository>
+
         <repository>
             <!-- Folia -->
             <id>papermc</id>
@@ -141,6 +147,19 @@
             <groupId>com.dfsek.terra</groupId>
             <artifactId>manifest-addon-loader</artifactId>
             <version>1.0.0-BETA+fd6decc70</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.oheers.evenmorefish</groupId>
+            <artifactId>even-more-fish-api</artifactId>
+            <version>2.0.15</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.oheers.evenmorefish</groupId>
+            <artifactId>even-more-fish-plugin</artifactId>
+            <version>2.0.15</version>
+            <classifier>shadow</classifier>
             <scope>provided</scope>
         </dependency>
         <dependency>

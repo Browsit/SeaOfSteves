@@ -24,6 +24,7 @@ import org.browsit.seaofsteves.util.NBTAPI;
 import org.browsit.seaofsteves.util.WorldUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Boat;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -63,8 +64,14 @@ public class VehicleListener implements Listener {
             return;
         }
         NBTAPI.addNBT(event.getEntity(), "sos_owner", player.getUniqueId().toString());
-        foliaLib.getScheduler().runAtEntityLater(player, () ->
-                player.getInventory().setItem(gear.getDingySlot(), PirateEmpty.get(player)), 2L);
+        foliaLib.getScheduler().runAtEntityLater(player, task -> {
+            plugin.getLogger().info(player + " placed vessel at " + event.getEntity().getLocation());
+            player.getInventory().setItem(gear.getDingySlot(), PirateEmpty.get(player));
+            for (Entity nearby : player.getNearbyEntities(10,10,10)) {
+                plugin.getLogger().info(nearby.getType().name());
+                plugin.getLogger().info(NBTAPI.getNBT(event.getEntity(), "sos_owner"));
+            }
+        }, 2L);
     }
 
     @EventHandler

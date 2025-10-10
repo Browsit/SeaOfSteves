@@ -38,6 +38,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.VillagerCareerChangeEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -144,15 +145,41 @@ public class EntityListener implements Listener {
         if (!WorldUtil.isAllowedWorld(event.getWorld().getName())) {
             return;
         }
-        if (!config.isMerchantEnabled()) {
-            return;
-        }
-        for (Entity entity : event.getEntities()) {
+        for (final Entity entity : event.getEntities()) {
             if (entity instanceof Villager) {
-                entity.setCustomName(config.getMerchantName());
+                if (((Villager)entity).getProfession().equals(Villager.Profession.FISHERMAN) ||
+                        ((Villager)entity).getProfession().equals(Villager.Profession.CARTOGRAPHER)) {
+                    if (!config.isFishmongerEnabled()) {
+                        return;
+                    }
+                    entity.setCustomName(config.getFishmongerName());
+                } else {
+                    if (!config.isMerchantEnabled()) {
+                        return;
+                    }
+                    entity.setCustomName(config.getMerchantName());
+                }
                 entity.setCustomNameVisible(true);
             }
         }
+    }
+
+    @EventHandler
+    public void onVillagerCareerChangeEvent(final VillagerCareerChangeEvent event) {
+        if (!WorldUtil.isAllowedWorld(event.getEntity().getWorld().getName())) {
+            return;
+        }
+        if (!config.isFishmongerEnabled()) {
+            return;
+        }
+        final Villager villager = event.getEntity();
+        plugin.getFoliaLib().getScheduler().runAtEntityLater(villager, task -> {
+            if (villager.getProfession().equals(Villager.Profession.FISHERMAN) ||
+                    villager.getProfession().equals(Villager.Profession.CARTOGRAPHER)) {
+                villager.setCustomName(config.getFishmongerName());
+                villager.setCustomNameVisible(true);
+            }
+        }, 2L);
     }
 
     /*@EventHandler

@@ -8,4 +8,4 @@ sos:
     spawn-captain: 5
   volcano:
     spawn-magma-cube: 40
-    spawn-tephra: 50
+    spawn-tephra: 90

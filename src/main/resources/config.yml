@@ -8,6 +8,11 @@ sos:
     material: MAGMA_BLOCK
     start-height: 30
     cancel-drop: true
+  fishmongers:
+    enabled: true
+    name: "Fishmonger"
+    reward: 2
+    use-vault: false
   general:
     block-explode: false
   merchants:

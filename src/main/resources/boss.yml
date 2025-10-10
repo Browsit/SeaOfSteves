@@ -6,7 +6,7 @@ sos:
       biome: VOLCANO_PIT
       name: "King Blaze"
       drop: BLAZE_ROD
-      health: 50.0
+      health: 100.0
       respawn: 900000
       scale: 4.0
       use-bossbar: true

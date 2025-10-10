@@ -14,14 +14,6 @@ import com.codisimus.plugins.phatloots.PhatLoot;
 import com.codisimus.plugins.phatloots.PhatLootChest;
 import com.codisimus.plugins.phatloots.PhatLoots;
 import com.tcoded.folialib.FoliaLib;
-import io.lumine.mythic.api.mobs.MythicMob;
-import io.lumine.mythic.api.skills.Skill;
-import io.lumine.mythic.api.skills.SkillCaster;
-import io.lumine.mythic.bukkit.BukkitAdapter;
-import io.lumine.mythic.bukkit.adapters.BukkitEntity;
-import io.lumine.mythic.core.mobs.ActiveMob;
-import io.lumine.mythic.core.skills.SkillMetadataImpl;
-import io.lumine.mythic.core.skills.SkillTriggers;
 import me.gamercoder215.mobchip.EntityBrain;
 import me.gamercoder215.mobchip.ai.EntityAI;
 import me.gamercoder215.mobchip.ai.goal.PathfinderMeleeAttack;
@@ -45,7 +37,9 @@ import org.browsit.seaofsteves.settings.ConfigSettings;
 import org.browsit.seaofsteves.settings.GearSettings;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.ItemUtil;
+import org.browsit.seaofsteves.util.MythicUtil;
 import org.browsit.seaofsteves.util.NBTAPI;
+import org.browsit.seaofsteves.util.PlayerUtil;
 import org.browsit.seaofsteves.util.TerraUtil;
 import org.browsit.seaofsteves.util.WorldUtil;
 import org.bukkit.ChatColor;
@@ -69,6 +63,7 @@ import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -271,19 +266,20 @@ public class PlayerListener implements Listener {
                         }
                         if (!lastKilledBoss.containsKey(player.getUniqueId())
                                 || System.currentTimeMillis() - lastKilledBoss.get(player.getUniqueId()) > 1800000L) { // 30 minutes
-                            if (random.nextInt(50) == 1) {
+                            if (random.nextInt(chance.getVolcanoSpawnTephra()) == 1) {
                                 IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.RED + IO.getLang("moveKeepMoving"));
                                 new Tephra(plugin, player.getLocation());
                             }
                         }
                     }
-                    if (terraBiomeID.equals("VOLCANO_BASE_EDGE") || terraBiomeID.startsWith(bossBiome)) {
+                    boolean hasBossNearby = false; // TODO global inBossFight var
+                    if (terraBiomeID.equals("VOLCANO_BASE_EDGE") /*|| terraBiomeID.startsWith(bossBiome)*/) {
                         if (!lastEnteredVolcano.containsKey(player.getUniqueId())) {
                             lastEnteredVolcano.put(player.getUniqueId(), System.currentTimeMillis());
                             IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.YELLOW + IO.getLang("moveBossApproach"));
                             return;
                         }
-                        boolean hasBossNearby = false;
+
                         for (final Entity nearby : player.getNearbyEntities(70, 25, 70)) {
                             if (!NBTAPI.hasNBT(nearby, "sos_boss")) {
                                 continue;
@@ -316,7 +312,6 @@ public class PlayerListener implements Listener {
                             return;
                         }
                         if (System.currentTimeMillis() - lastKilledBoss.get(player.getUniqueId()) > 900000L) { // 15 minutes
-                            boolean hasBossNearby = false; // TODO global inBossFight var
                             for (final Entity nearby : player.getNearbyEntities(50, 25, 50)) {
                                 if (NBTAPI.hasNBT(nearby, "sos_boss")) {
                                     hasBossNearby = true;
@@ -325,21 +320,16 @@ public class PlayerListener implements Listener {
                             }
                             if (!hasBossNearby) {
                                 final Location toSpawn = TerraUtil.getTerraBiomeCenter(terraBiome, event.getTo());
-                                LivingEntity boss = null;
+                                LivingEntity boss;
                                 if (depends.getMythicMobs() != null
                                         && !bosses.getKingBlazeMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
-                                    final MythicMob mythicMob = depends.getMythicMobs().getMobManager()
-                                            .getMythicMob(bosses.getKingBlazeMythic()).orElse(null);
-                                    if (mythicMob != null){
-                                        final ActiveMob activeMob = mythicMob.spawn(BukkitAdapter.adapt(toSpawn), 1);
-                                        boss = (LivingEntity) activeMob.getEntity().getBukkitEntity();
-                                    }
+                                    boss = MythicUtil.spawnMythicMobAtLocation(bosses.getKingBlazeMythic(), toSpawn);
                                 } else {
                                     boss = (LivingEntity) player.getWorld().spawnEntity(toSpawn, EntityType.BLAZE);
                                     boss.setCustomName(bossName);
                                     boss.setCustomNameVisible(bosses.canKingBlazeUseNameTag());
                                     boss.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(bosses.getKingBlazeScale());
-                                    double health = bosses.getKingBlazeHealth();
+                                    final double health = bosses.getKingBlazeHealth();
                                     boss.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health);
                                     boss.setHealth(health);
                                     if (bosses.canKingBlazeUseBossBar()) {
@@ -358,6 +348,12 @@ public class PlayerListener implements Listener {
                                     return;
                                 }
                                 NBTAPI.addNBT(boss, "sos_boss", bossName);
+                                for (final Entity nearby : boss.getNearbyEntities(50, 25, 20)) {
+                                    if (nearby instanceof Player) {
+                                        IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.GREEN
+                                                + IO.getLang("bossSpawned").replace("<player>", player.getDisplayName() + ChatColor.GREEN));
+                                    }
+                                }
                                 plugin.getLogger().info(bossName + " spawned by player of UUID " + player.getUniqueId());
                             }
                         }
@@ -515,53 +511,30 @@ public class PlayerListener implements Listener {
             return;
         }
         if (event.getRightClicked().getType() == EntityType.VILLAGER) {
-            if (config.isMerchantEnabled()) {
-                event.setCancelled(true);
-                sellTreasure(player, event.getRightClicked());
+            final Villager villager = (Villager) event.getRightClicked();
+            if (villager.getProfession().equals(Villager.Profession.FISHERMAN) ||
+                    villager.getProfession().equals(Villager.Profession.CARTOGRAPHER)) {
+                if (config.isFishmongerEnabled()) {
+                    event.setCancelled(true);
+                    // TODO integrate properly and config node
+                    if (depends.getEvenMoreFish() != null) {
+                        player.performCommand("emf gui");
+                    } else {
+                        PlayerUtil.sellFish(player, villager);
+                    }
+                }
+            } else {
+                if (config.isMerchantEnabled()) {
+                    event.setCancelled(true);
+                    PlayerUtil.sellTreasure(player, villager);
+                }
             }
         } else if (event.getRightClicked().getType() == EntityType.CHEST_MINECART) {
             event.setCancelled(true);
         }
     }
 
-    private void sellTreasure(final Player player, final Entity merchant) {
-        final boolean useVault = config.canMerchantUseVault() && depends.isPluginAvailable("Vault");
-        int totalWorth = 0;
-        for (final ItemStack itemStack : player.getInventory().getStorageContents()) {
-            if (itemStack == null || itemStack.getType() == Material.AIR) {
-                continue;
-            }
-            if (ItemUtil.isGear(itemStack)) {
-                continue;
-            }
-            for (final ItemStack lootItem : ItemUtil.getLootItems()) {
-                if (lootItem.isSimilar(itemStack)) {
-                    totalWorth += itemStack.getAmount() * config.getMerchantReward();
-                    player.getInventory().remove(itemStack);
-                }
-            }
-        }
-        if (totalWorth > 0) {
-            final Pirate pirate = plugin.getPirate(player.getUniqueId());
-            pirate.setGoldEarned(pirate.getGoldEarned() + totalWorth);
-            if (useVault) {
-                depends.getVaultEconomy().depositPlayer(player, totalWorth);
-            }
-            final String amount = useVault ? depends.getVaultEconomy().format(totalWorth) : String.valueOf(totalWorth);
-            final String points = useVault ? "" : IO.getLang("interactMerchantPoints");
-            IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.GREEN + IO.getLang("interactMerchantSold")
-                    .replace("<name>", config.getMerchantName())
-                    .replace("<amount>", amount).replace("<points>", points));
-            player.playSound(player.getLocation(), Sound.BLOCK_AMETHYST_CLUSTER_HIT, 1.0f, 1.0f);
-            final PirateSellTreasureEvent pEvent = new PirateSellTreasureEvent(
-                    plugin.getPirate(player.getUniqueId()), merchant, totalWorth);
-            plugin.getServer().getPluginManager().callEvent(pEvent);
-            plugin.getLogger().info(player.getName() + " sold all treasures to " + config.getMerchantName() + " for "
-                    + amount + " points");
-        } else {
-            IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.YELLOW + IO.getLang("interactMerchantFailed"));
-        }
-    }
+
 
     @SuppressWarnings("deprecation")
     @EventHandler(ignoreCancelled = false) // <-- Not redundant; do not remove
@@ -602,7 +575,9 @@ public class PlayerListener implements Listener {
                     if (depends.getMythicMobs() != null && depends.getMythicMobs().getItemManager().isMythicItem(hand)) {
                         final String mythic = depends.getMythicMobs().getItemManager().getMythicTypeFromItem(hand);
                         if (mythic.equals("VOTSDirectionControler")) {
-                            rollForEnemyVotsShipSpawn(player);
+                            if (random.nextInt(chance.getOceanSpawnVotsNpc()) == 1) {
+                                PlayerUtil.spawnEnemyVotsShipSpawn(player);
+                            }
                             return;
                         }
                     }
@@ -736,7 +711,9 @@ public class PlayerListener implements Listener {
                             if (depends.getMythicMobs() != null && depends.getMythicMobs().getItemManager().isMythicItem(hand)) {
                                 final String mythic = depends.getMythicMobs().getItemManager().getMythicTypeFromItem(hand);
                                 if (mythic.equals("VOTSDirectionControler")) {
-                                    rollForEnemyVotsShipSpawn(player);
+                                    if (random.nextInt(chance.getOceanSpawnVotsNpc()) == 1) {
+                                        PlayerUtil.spawnEnemyVotsShipSpawn(player);
+                                    }
                                     break;
                                 }
                             }
@@ -809,37 +786,12 @@ public class PlayerListener implements Listener {
 
     @EventHandler
     public void onPlayerKick(final PlayerKickEvent event) {
-        adios(event.getPlayer());
+        PlayerUtil.adios(event.getPlayer());
     }
 
     @EventHandler
     public void onPlayerQuit(final PlayerQuitEvent event) {
-        adios(event.getPlayer());
-    }
-
-    private void adios(final Player player) {
-        if (config.isVotsEnabled() && depends.getMythicMobs() != null) {
-            for (final Entity e : player.getNearbyEntities(250, 50, 250)) {
-                if (NBTAPI.hasNBT(e, "sos_owner")) {
-                    final String owner = NBTAPI.getNBT(e, "sos_owner");
-                    if (owner == null) {
-                        return;
-                    }
-                    if (owner.equals(player.getUniqueId().toString())) {
-                        Optional<ActiveMob> am = depends.getMythicMobs().getMobManager().getActiveMob(e.getUniqueId());
-                        am.ifPresent(ActiveMob::despawn);
-                    }
-                }
-            }
-        }
-        final Pirate pirate = plugin.getPirate(player.getUniqueId());
-        if (plugin.getAllPirates().contains(pirate) && player.isInsideVehicle()) {
-            final Entity vehicle = player.getVehicle();
-            if (vehicle == null) { return; }
-            vehicle.eject();
-            vehicle.remove();
-        }
-        plugin.removePirate(pirate);
+        PlayerUtil.adios(event.getPlayer());
     }
 
     private boolean isWaterBiome(final Biome biome) {
@@ -848,28 +800,5 @@ public class PlayerListener implements Listener {
                 || biome.equals(Biome.WARM_OCEAN) || biome.equals(Biome.FROZEN_OCEAN)
                 || biome.equals(Biome.COLD_OCEAN) || biome.equals(Biome.OCEAN)
                 || biome.equals(Biome.FROZEN_RIVER) || biome.equals(Biome.RIVER);
-    }
-
-    private void rollForEnemyVotsShipSpawn(final Player player) {
-        if (random.nextInt(chance.getOceanSpawnVotsNpc()) == 1) {
-            foliaLib.getScheduler().runAtEntityLater(player, () -> {
-                final Location loc = player.getLocation();
-                final Vector inverseDirectionVec = loc.getDirection().normalize().multiply(-20);
-                loc.add(inverseDirectionVec);
-                loc.setY(60.0); // Below ocean surface
-                if (loc.getBlock().isLiquid()) {
-                    // Spawn sound
-                    final Optional<Skill> opt = plugin.getDependencies().getMythicMobs().getSkillManager().getSkill("VOTSNPCGalleonShipDeathSound");
-                    if (opt.isPresent()) {
-                        final BukkitEntity bukkitEntity = new BukkitEntity(player);
-                        final SkillCaster c = plugin.getDependencies().getMythicMobs().getSkillManager().getCaster(bukkitEntity);
-                        final SkillMetadataImpl meta = new SkillMetadataImpl(SkillTriggers.API, c, bukkitEntity);
-                        opt.get().execute(meta);
-                    }
-                    plugin.getDependencies().getMythicMobs().getMobManager().spawnMob("VOTSNPCGalleon", loc);
-                    IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.RED + IO.getLang("enemyVesselChase"));
-                }
-            }, 40L);
-        }
     }
 }

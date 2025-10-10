@@ -14,6 +14,7 @@ import org.browsit.seaofsteves.player.Pirate;
 import org.bukkit.entity.Entity;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.player.PlayerEvent;
+import org.jetbrains.annotations.Nullable;
 
 public class PirateSellTreasureEvent extends PlayerEvent {
     private final Entity merchant;
@@ -28,13 +29,14 @@ public class PirateSellTreasureEvent extends PlayerEvent {
      * @param merchant The satisfied merchant
      * @param totalValue The total point or monetary value
      */
-    public PirateSellTreasureEvent(Pirate pirate, Entity merchant, int totalValue) {
+    public PirateSellTreasureEvent(Pirate pirate, @Nullable Entity merchant, int totalValue) {
         super(pirate.getPlayer());
 
         this.merchant = merchant;
         this.totalValue = totalValue;
     }
 
+    @Nullable
     public Entity getMerchant() {
         return merchant;
     }

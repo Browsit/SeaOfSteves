@@ -22,7 +22,6 @@ import net.md_5.bungee.api.ChatMessageType;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.api.event.PirateFishCaughtEvent;
 import org.browsit.seaofsteves.api.event.PirateOpenTreasureEvent;
-import org.browsit.seaofsteves.api.event.PirateSellTreasureEvent;
 import org.browsit.seaofsteves.boss.lavablock.Tephra;
 import org.browsit.seaofsteves.depend.Dependencies;
 import org.browsit.seaofsteves.gear.type.boat.PirateDingy;
@@ -85,12 +84,10 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -198,7 +195,10 @@ public class PlayerListener implements Listener {
         if (player.isFlying()) {
             return;
         }
-        final Biome biome = TerraUtil.getBukkitBiome(event.getPlayer().getLocation());
+        Biome biome = null;
+        if (depends.getTerra() != null) {
+            biome = TerraUtil.getBukkitBiome(event.getPlayer().getLocation());
+        }
         if (biome == null) {
             return;
         }

@@ -23,6 +23,7 @@ import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Drowned;
 import org.bukkit.entity.Enemy;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -38,6 +39,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.entity.VillagerCareerChangeEvent;
 import org.bukkit.event.world.EntitiesLoadEvent;
 import org.bukkit.inventory.ItemStack;
@@ -71,9 +73,13 @@ public class EntityListener implements Listener {
         if (!WorldUtil.isAllowedWorld(entity.getWorld().getName())) {
             return;
         }
-        if (entity.getLocation().getBlock().getType().equals(Material.WATER)) {
+        // Ignore VOTS spawn
+        if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.PATROL)) {
             return;
         }
+        /*if (entity.getLocation().getBlock().getType().equals(Material.WATER)) {
+            return;
+        }*/
         if (!(entity instanceof Enemy)) {
             return;
         }
@@ -84,10 +90,11 @@ public class EntityListener implements Listener {
         }
         // Reduce number of Drowned
         if (entity.getType().equals(EntityType.DROWNED)) {
-            if (random.nextInt(chance.getOceanSpawnDrowned()) == 1) {
+            if (random.nextInt(chance.getOceanSpawnDrowned()) != 1) {
                 event.setCancelled(true);
                 return;
             }
+            return;
         }
         // Allow select enemies to spawn normally
         if (entity.getType().equals(EntityType.PILLAGER) || entity.getType().equals(EntityType.RAVAGER)) {
@@ -128,14 +135,35 @@ public class EntityListener implements Listener {
                 final AttributeInstance ai = skel.getAttribute(Attribute.GENERIC_MAX_HEALTH);
                 if (skel.getEquipment() != null && ai != null) {
                     ai.setBaseValue(10.0);
+                    skel.setHealth(10.0);
                     skel.getEquipment().setItemInMainHand(new ItemStack(Material.WOODEN_SWORD));
                 }
             }
         } else if (entity.getType().equals(EntityType.WITCH)) {
             if (random.nextInt(chance.getIslandSpawnCaptain()) == 1) {
-                Entity captain = entity.getWorld().spawnEntity(entity.getLocation(), EntityType.WITHER_SKELETON);
+                final Entity captain = entity.getWorld().spawnEntity(entity.getLocation(), EntityType.WITHER_SKELETON);
                 captain.setCustomName(ChatColor.RED + config.getCreatureNameCaptain());
                 captain.setCustomNameVisible(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntitySpawn(final EntitySpawnEvent event) {
+        if (!config.isCreatureEnabled()) {
+            return;
+        }
+        if (event.getLocation().getWorld() != null
+                && !WorldUtil.isAllowedWorld(event.getLocation().getWorld().getName())) {
+            return;
+        }
+        if (event.getEntity().getType().equals(EntityType.DROWNED)) {
+            // Must use EntitySpawnEvent; using CreatureSpawnEvent does not work on Drowned
+            final Drowned drowned = (Drowned) event.getEntity();
+            final AttributeInstance ai = drowned.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+            if (ai != null) {
+                ai.setBaseValue(10.0);
+                drowned.setHealth(10.0);
             }
         }
     }

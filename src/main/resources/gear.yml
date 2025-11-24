@@ -95,7 +95,7 @@ sos:
     slot-1:
       mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
     slot-2:
-      mythic: "VOTSMediumShipRepairWeak"
+      mythic: "VOTSShipRepairMedium"
     slot-3:
       mythic: "VOTSDirectionControler"
     slot-4:

@@ -165,7 +165,7 @@
         <dependency>
             <groupId>com.github.datatags.MobChipLite</groupId>
             <artifactId>mobchip-bukkit</artifactId>
-            <version>1.10.14</version>
+            <version>1.10.15</version>
         </dependency>
         <dependency>
             <groupId>com.ticxo.modelengine</groupId>

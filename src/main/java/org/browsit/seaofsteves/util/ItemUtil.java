@@ -208,23 +208,10 @@ public class ItemUtil {
             final ItemStack mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack(item);
             // Set position
             if (mythic == null) {
-                plugin.getLogger().severe("Unknown mythic gear " + item);
+                plugin.getLogger().severe("Unknown mythic gear " + item + ", using default gear for this slot");
+                continue;
             }
             player.getInventory().setItem(slot, mythic);
-            /*final int finalSlot = slot;
-            plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
-                // Override skill items
-                final ItemStack i = player.getInventory().getItem(finalSlot);
-                if (mythic != null && plugin.getDependencies().getMythicMobs().getItemManager().isMythicItem(i)) {
-                    if (i != null && i.getItemMeta() != null && i.getItemMeta().getLore() != null
-                            && i.getItemMeta().getLore().equals(mythic.getItemMeta().getLore())) {
-                        player.getInventory().setItem(finalSlot, mythic);
-                    }
-                } else {
-                    plugin.getLogger().severe("Mythic naval gear " + item + " does not exist!");
-                    IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.RED + IO.getLang("problemOccurred"));
-                }
-            }, 20L);*/
         }
     }
 

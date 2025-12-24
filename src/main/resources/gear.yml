@@ -5,7 +5,7 @@ sos:
       enabled: true
       display: "&6Sabre"
       lore:
-        - "&r&f*********"
+        - "&r&4****************************"
         - "&r&4Left Click &fto attack"
         - "&r&7Cannot hurt Merchants"
       slot: 0
@@ -14,7 +14,7 @@ sos:
       enabled: true
       display: "&6Longbow"
       lore:
-        - "&r&f*********"
+        - "&r&4****************************"
         - "&r&4Right Click &fto fire arrow"
         - "&r&fHold &4Right Click &fto charge"
       slot: 1
@@ -24,7 +24,7 @@ sos:
       enabled: true
       display: "&6Scoop"
       lore:
-        - "&r&f*********"
+        - "&r&4****************************"
         - "&r&fHold &4Left Click &fto dig"
         - "&r&7Works best on beaches"
       slot: 2
@@ -33,7 +33,7 @@ sos:
       enabled: true
       display: "&6Divining Rod"
       lore:
-        - "&r&f*********"
+        - "&r&4****************************"
         - "&r&fHold to locate treasure"
         - "&r&7Only works on beaches"
       slot: 3
@@ -42,7 +42,7 @@ sos:
       enabled: true
       display: "&6Ship"
       lore:
-        - "&r&f*********"
+        - "&r&4****************************"
         - "&r&4Left Click &fto change"
         - "&r&4Right Click &fto launch"
       slot: 4
@@ -51,7 +51,7 @@ sos:
       enabled: true
       display: "&6Fireball"
       lore:
-        - "&r&f*********"
+        - "&r&4****************************"
         - "&r&4Right Click &fto fire"
         - "&r&7Only works aboard ships"
       slot: 5
@@ -60,7 +60,7 @@ sos:
       enabled: true
       display: "&6Spyglass"
       lore:
-        - "&r&f*********"
+        - "&r&4****************************"
         - "&r&4Right Click &fto spy"
       slot: 6
       mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
@@ -68,7 +68,7 @@ sos:
       enabled: true
       display: "&6Surveyor"
       lore:
-        - "&r&f*********"
+        - "&r&4****************************"
         - "&r&4Right Click &fto find village"
         - "&r&7Only works aboard ships"
       slot: 7
@@ -77,7 +77,7 @@ sos:
       enabled: true
       display: "&6Fishing Rod"
       lore:
-        - "&r&f*********"
+        - "&r&4****************************"
         - "&r&4Right Click &fto cast"
       slot: 8
       mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
@@ -85,26 +85,35 @@ sos:
       enabled: false
       display: "&6Pickaxe"
       lore:
-        - "&r&f*********"
+        - "&r&4****************************"
         - "&r&4Right Click &fto mine"
       slot: 5
       mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
   gear-naval:
     slot-0:
-      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+      mythic:
+        - "NAME_OF_ITEM_TO_USE_INSTEAD"
     slot-1:
-      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+      mythic:
+        - "NAME_OF_ITEM_TO_USE_INSTEAD"
     slot-2:
-      mythic: "VOTSShipRepairMedium"
+      mythic:
+        - "VOTSShipRepairMedium"
     slot-3:
-      mythic: "VOTSDirectionControler"
+      mythic:
+        - "VOTSDirectionControler"
     slot-4:
-      mythic: "VOTSSpecialControler"
+      mythic:
+        - "VOTSSpecialControler"
     slot-5:
-      mythic: "VOTSAmmoCannonBall"
+      mythic:
+        - "VOTSAmmoCannonBall"
     slot-6:
-      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+      mythic:
+        - "NAME_OF_ITEM_TO_USE_INSTEAD"
     slot-7:
-      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+      mythic:
+        - "NAME_OF_ITEM_TO_USE_INSTEAD"
     slot-8:
-      mythic: "NAME_OF_ITEM_TO_USE_INSTEAD"
+      mythic:
+        - "NAME_OF_ITEM_TO_USE_INSTEAD"

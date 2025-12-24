@@ -11,16 +11,8 @@
 package org.browsit.seaofsteves;
 
 import com.tcoded.folialib.FoliaLib;
-import io.lumine.mythic.api.adapters.AbstractEntity;
-import io.lumine.mythic.api.adapters.AbstractLocation;
-import io.lumine.mythic.api.config.MythicConfig;
 import io.lumine.mythic.api.skills.Skill;
-import io.lumine.mythic.api.skills.SkillCaster;
-import io.lumine.mythic.api.skills.SkillHolder;
-import io.lumine.mythic.api.skills.SkillMetadata;
-import io.lumine.mythic.api.skills.SkillTrigger;
 import io.lumine.mythic.core.mobs.ActiveMob;
-import io.lumine.mythic.core.skills.SkillCondition;
 import org.browsit.seaofsteves.command.SosExecutor;
 import org.browsit.seaofsteves.depend.Dependencies;
 import org.browsit.seaofsteves.expansion.SOSExpansion;
@@ -32,9 +24,9 @@ import org.browsit.seaofsteves.listener.ProjectileListener;
 import org.browsit.seaofsteves.listener.VehicleListener;
 import org.browsit.seaofsteves.player.Pirate;
 import org.browsit.seaofsteves.settings.BossSettings;
+import org.browsit.seaofsteves.settings.ChanceSettings;
 import org.browsit.seaofsteves.settings.ConfigSettings;
 import org.browsit.seaofsteves.settings.GearSettings;
-import org.browsit.seaofsteves.settings.ChanceSettings;
 import org.browsit.seaofsteves.timer.ResetTimer;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.WorldUtil;
@@ -46,8 +38,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentSkipListSet;
@@ -112,14 +102,24 @@ public class SeaOfSteves extends JavaPlugin {
         timer = new ResetTimer(this);
         timer.run();
 
-        if (depends.getMythicMobs() != null) {
-            getLogger().info("Overwriting conflicting VOTSSpawnControlers skill, if present");
-            final Optional<Skill> opt = getDependencies().getMythicMobs().getSkillManager().getSkill("VOTSSpawnControlers");
-            if (opt.isPresent()) {
-                final Skill toRemove = opt.get();
-                getDependencies().getMythicMobs().getSkillManager().getSkills().remove(toRemove);
+        // Delay this code to run after MythicMobs fully loads
+        foliaLib.getScheduler().runLater(() -> {
+            if (depends.getMythicMobs() != null) {
+                getLogger().info("Overwriting conflicting VOTS skills, if present...");
+                final Optional<Skill> opt = getDependencies().getMythicMobs().getSkillManager().getSkill("VOTSSpawnControlers");
+                if (opt.isPresent()) {
+                    final Skill toRemove = opt.get();
+                    getDependencies().getMythicMobs().getSkillManager().getSkills().remove(toRemove);
+                    getLogger().info("Successfully disabled VOTSSpawnControlers");
+                }
+                final Optional<Skill> opt2 = getDependencies().getMythicMobs().getSkillManager().getSkill("VOTSControlers");
+                if (opt2.isPresent()) {
+                    final Skill toRemove = opt2.get();
+                    getDependencies().getMythicMobs().getSkillManager().getSkills().remove(toRemove);
+                    getLogger().info("Successfully disabled VOTSControlers");
+                }
             }
-        }
+        }, 2L);
     }
 
     @Override

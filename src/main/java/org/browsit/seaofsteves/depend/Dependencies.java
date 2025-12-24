@@ -21,7 +21,6 @@ import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.permission.Permission;
 import org.browsit.seaofsteves.SeaOfSteves;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 import java.util.Objects;
@@ -86,9 +85,6 @@ public class Dependencies {
     public MythicBukkit getMythicMobs() {
         if (mythicMobs == null && isPluginAvailable("MythicMobs")) {
             mythicMobs = MythicBukkit.inst();
-
-            // TODO add gemshorn
-            final ItemStack dir = mythicMobs.getItemManager().getItemStack("VOTSDirectionControler");
         }
         return mythicMobs;
     }

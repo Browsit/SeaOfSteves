@@ -41,6 +41,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -49,6 +50,7 @@ public class ItemUtil {
     public static SeaOfSteves plugin = (SeaOfSteves) Bukkit.getPluginManager().getPlugin("SeaOfSteves");
     private final static ConcurrentHashMap<UUID, Material> lastUsedItem = new ConcurrentHashMap<>();
     private final static Set<ItemStack> lootItems = new HashSet<>();
+    private static final Random rand = new Random();
 
     /**
      * Adds item to player's inventory. If full, item is dropped at player's location.
@@ -196,8 +198,9 @@ public class ItemUtil {
             return;
         }
         int slot = -1;
-        for (final String item : plugin.getGearSettings().getNavalSlotsMythic()) {
+        for (final List<String> items : plugin.getGearSettings().getNavalSlotsMythic()) {
             slot++;
+            final String item = items.get(rand.nextInt(items.size()));
             if (item.equals("NAME_OF_ITEM_TO_USE_INSTEAD")) {
                 continue;
             }

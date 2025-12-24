@@ -12,6 +12,7 @@ package org.browsit.seaofsteves.listener;
 
 import com.tcoded.folialib.FoliaLib;
 import com.ticxo.modelengine.api.events.ModelDismountEvent;
+import com.ticxo.modelengine.api.events.ModelMountEvent;
 import com.ticxo.modelengine.api.model.ActiveModel;
 import io.lumine.mythic.api.mobs.entities.SpawnReason;
 import io.lumine.mythic.api.skills.Skill;
@@ -41,7 +42,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPlaceEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
@@ -116,18 +116,24 @@ public class MythicListener implements Listener {
     }
 
     @EventHandler
-    public void onMythicMount(final PlayerInteractEntityEvent event) {
-        if (!WorldUtil.isAllowedWorld(event.getPlayer().getWorld().getName())) {
+    public void onMythicMount(final ModelMountEvent event) {
+        if (!WorldUtil.isAllowedWorld(event.getPassenger().getWorld().getName())) {
             return;
         }
         if (!config.isVotsEnabled()) {
             return;
         }
-        final String name = ChatColor.stripColor(event.getRightClicked().getName());
+        final ActiveModel am = event.getVehicle();
+        final String str = am.getBlueprint().getName().toLowerCase().replace("elitecreatures", "");
+        final String name = str.substring(0, 1).toUpperCase() + str.substring(1);
         if (!config.getVotsShips().contains(name)) {
             return;
         }
-        ItemUtil.renewGearNaval(event.getPlayer(), ChatColor.stripColor(event.getRightClicked().getName()));
+        if (event.getVehicle().getMountManager().isPresent() && am.getMountManager().get().hasRiders()) {
+            event.setCancelled(true);
+        } else {
+            ItemUtil.renewGearNaval((Player) event.getPassenger(), name);
+        }
     }
 
     @EventHandler
@@ -142,9 +148,8 @@ public class MythicListener implements Listener {
             return;
         }
         final ActiveModel am = event.getVehicle();
-        String name = am.getBlueprint().getName().toLowerCase().replace("elitecreatures", "");
-        String firstLetter = name.substring(0, 1).toUpperCase();
-        name = firstLetter + name.substring(1);
+        final String str = am.getBlueprint().getName().toLowerCase().replace("elitecreatures", "");
+        final String name = str.substring(0, 1).toUpperCase() + str.substring(1);
         if (config.getVotsShips().contains(name) && depends.getMythicMobs() != null) {
             final Player player = (Player) event.getPassenger();
             final ItemStack dir = depends.getMythicMobs().getItemManager().getItemStack("VOTSDirectionControler");

@@ -452,7 +452,6 @@ public class PlayerListener implements Listener {
                 && player.getLocation().add(0, -1, 0).getBlock().getType().equals(Material.WATER);
     }
 
-    @SuppressWarnings("deprecation")
     private void runDetector(final Location location, final Player player) {
         final World world = location.getWorld();
         if (world == null) {
@@ -547,7 +546,7 @@ public class PlayerListener implements Listener {
         if (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             if (depends.getMythicMobs() != null && depends.getMythicMobs().getItemManager().isMythicItem(hand)) {
                 final String mythic = depends.getMythicMobs().getItemManager().getMythicTypeFromItem(hand);
-                if (mythic.startsWith("VOTSMediumShipRepair") || mythic.equals("VOTSAmmoCannonBall")) {
+                if (mythic.startsWith("VOTSShipRepair") || mythic.equals("VOTSAmmoCannonBall")) {
                     final int slot = player.getInventory().getHeldItemSlot();
                     final ItemStack replace = depends.getMythicMobs().getItemManager().getItemStack(mythic);
                     foliaLib.getScheduler().runAtEntityLater(player, () -> player.getInventory().setItem(slot, replace), 2L);

@@ -72,7 +72,7 @@ public class GearSettings {
     private List<String> pickaxeLore;
     private int pickaxeSlot;
     private String pickaxeMythic;
-    private LinkedList<String> navalSlotsMythic = new LinkedList<>();
+    private LinkedList<List<String>> navalSlotsMythic = new LinkedList<>();
 
     public GearSettings(SeaOfSteves plugin) {
         this.plugin = plugin;
@@ -486,11 +486,11 @@ public class GearSettings {
         this.pickaxeMythic = pickaxeMythic;
     }
 
-    public LinkedList<String> getNavalSlotsMythic() {
+    public LinkedList<List<String>> getNavalSlotsMythic() {
         return navalSlotsMythic;
     }
 
-    public void setNavalSlotsMythic(final LinkedList<String> navalSlotsMythic) {
+    public void setNavalSlotsMythic(final LinkedList<List<String>> navalSlotsMythic) {
         this.navalSlotsMythic = navalSlotsMythic;
     }
 
@@ -547,15 +547,14 @@ public class GearSettings {
         pickaxeLore = translateList(cfg.getStringList("sos.gear.pickaxe.lore"));
         pickaxeSlot = cfg.getInt("sos.gear.pickaxe.slot", 5);
         pickaxeMythic = cfg.getString("sos.gear.pickaxe.mythic", "NAME_OF_ITEM_TO_USE_INSTEAD");
-        navalSlotsMythic.add(cfg.getString("sos.gear-naval.slot-0.mythic", "NAME_OF_ITEM_TO_USE_INSTEAD"));
-        navalSlotsMythic.add(cfg.getString("sos.gear-naval.slot-1.mythic", "NAME_OF_ITEM_TO_USE_INSTEAD"));
-        navalSlotsMythic.add(cfg.getString("sos.gear-naval.slot-2.mythic", "VOTSMediumShipRepairWeak"));
-        navalSlotsMythic.add(cfg.getString("sos.gear-naval.slot-3.mythic", "VOTSDirectionControler"));
-        navalSlotsMythic.add(cfg.getString("sos.gear-naval.slot-4.mythic", "VOTSSpecialControler"));
-        navalSlotsMythic.add(cfg.getString("sos.gear-naval.slot-5.mythic", "NAME_OF_ITEM_TO_USE_INSTEAD"));
-        navalSlotsMythic.add(cfg.getString("sos.gear-naval.slot-6.mythic", "NAME_OF_ITEM_TO_USE_INSTEAD"));
-        navalSlotsMythic.add(cfg.getString("sos.gear-naval.slot-7.mythic", "NAME_OF_ITEM_TO_USE_INSTEAD"));
-        navalSlotsMythic.add(cfg.getString("sos.gear-naval.slot-8.mythic", "NAME_OF_ITEM_TO_USE_INSTEAD"));
+        for (int i = 0; i <= 8; i++) {
+            final List<String> list = cfg.getStringList("sos.gear-naval.slot-" + i + ".mythic");
+            if (list.isEmpty()) {
+                // Legacy
+                list.add(cfg.getString("sos.gear-naval.slot-" + i + ".mythic"));
+            }
+            navalSlotsMythic.add(list);
+        }
     }
 
     private String translate(final String str) {

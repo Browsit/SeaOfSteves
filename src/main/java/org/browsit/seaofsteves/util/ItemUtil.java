@@ -286,6 +286,11 @@ public class ItemUtil {
         }
     }
 
+    public static boolean isFishType(final Material material) {
+        return material.equals(Material.COD) || material.equals(Material.SALMON)
+                || material.equals(Material.PUFFERFISH) || material.equals(Material.TROPICAL_FISH);
+    }
+
     private static void extractItem(final Loot loot) {
         if (loot instanceof com.codisimus.plugins.phatloots.loot.Item) {
             lootItems.add(((com.codisimus.plugins.phatloots.loot.Item) loot).getItem());

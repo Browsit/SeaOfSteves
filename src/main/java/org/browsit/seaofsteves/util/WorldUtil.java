@@ -12,6 +12,7 @@ package org.browsit.seaofsteves.util;
 
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Biome;
 
 public class WorldUtil {
     public static SeaOfSteves plugin = (SeaOfSteves) Bukkit.getPluginManager().getPlugin("SeaOfSteves");
@@ -19,5 +20,18 @@ public class WorldUtil {
     public static boolean isAllowedWorld(String worldName) {
         if (plugin == null) { return false; }
         return plugin.getConfigSettings().getWorldNames().contains(worldName);
+    }
+
+    public static boolean isOceanBiome(final Biome biome) {
+        if (biome == null) { return false; }
+        return biome.equals(Biome.DEEP_LUKEWARM_OCEAN) || biome.equals(Biome.DEEP_FROZEN_OCEAN)
+                || biome.equals(Biome.DEEP_COLD_OCEAN) || biome.equals(Biome.DEEP_OCEAN)
+                || biome.equals(Biome.WARM_OCEAN) || biome.equals(Biome.FROZEN_OCEAN)
+                || biome.equals(Biome.COLD_OCEAN) || biome.equals(Biome.OCEAN);
+    }
+
+    public static boolean isWaterBiome(final Biome biome) {
+        if (biome == null) { return false; }
+        return isOceanBiome(biome) || biome.equals(Biome.FROZEN_RIVER) || biome.equals(Biome.RIVER);
     }
 }

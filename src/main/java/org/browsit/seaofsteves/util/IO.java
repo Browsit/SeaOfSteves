@@ -28,7 +28,8 @@ import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class IO {
-    private static FileConfiguration bosses;
+    private static FileConfiguration boss;
+    private static FileConfiguration chance;
     private static FileConfiguration gear;
     private static final ConcurrentHashMap<String, String> strings = new ConcurrentHashMap<>();
 
@@ -59,12 +60,16 @@ public class IO {
                 .loadConfiguration(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
         switch (fileName) {
             case "boss.yml" -> {
-                bosses = config;
-                bosses.options().setHeader(Collections.singletonList("Boss file for SeaOfSteves plugin"));
+                boss = config;
+                boss.options().setHeader(Collections.singletonList("Boss file for SeaOfSteves plugin"));
+            }
+            case "chance.yml" -> {
+                chance = config;
+                gear.options().setHeader(Collections.singletonList("Chance file for Sea of Steves (ex. value of 250 means 1/250 probability)"));
             }
             case "gear.yml" -> {
                 gear = config;
-                gear.options().setHeader(Collections.singletonList("Gear file for SeaOfSteves plugin (not for VOTS items)"));
+                gear.options().setHeader(Collections.singletonList("Gear file for SeaOfSteves plugin"));
             }
             case "strings.yml" -> {
                 for (final String key : config.getKeys(false)) {
@@ -74,8 +79,12 @@ public class IO {
         }
     }
 
-    public static FileConfiguration getBosses() {
-        return bosses;
+    public static FileConfiguration getBoss() {
+        return boss;
+    }
+
+    public static FileConfiguration getChance() {
+        return chance;
     }
 
     public static FileConfiguration getGear() {

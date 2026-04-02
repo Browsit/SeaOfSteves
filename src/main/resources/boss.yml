@@ -12,3 +12,12 @@ sos:
       use-bossbar: true
       use-nametag: true
       mythic: "NAME_OF_MOB_TO_USE_INSTEAD"
+    shark:
+      enabled: true
+      biome: WARM_OCEAN
+      name: "Shark"
+      drop: RAW_COD
+      health: 10.0
+      respawn: 20000
+      scale: 1.2
+      mythic: "NAME_OF_MOB_TO_USE_INSTEAD"

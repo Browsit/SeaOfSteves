@@ -1,25 +1,28 @@
+/*
+ * Copyright (c) Browsit, LLC
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT
+ * LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package org.browsit.seaofsteves.util;
 
 import com.tcoded.folialib.FoliaLib;
-import io.lumine.mythic.api.skills.Skill;
-import io.lumine.mythic.api.skills.SkillCaster;
-import io.lumine.mythic.bukkit.adapters.BukkitEntity;
 import io.lumine.mythic.core.mobs.ActiveMob;
-import io.lumine.mythic.core.skills.SkillMetadataImpl;
-import io.lumine.mythic.core.skills.SkillTriggers;
 import net.md_5.bungee.api.ChatMessageType;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.api.event.PirateSellTreasureEvent;
 import org.browsit.seaofsteves.player.Pirate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.Vector;
 
 import java.util.Optional;
 
@@ -101,7 +104,7 @@ public class PlayerUtil {
             if (ItemUtil.isGear(itemStack)) {
                 continue;
             }
-            if (itemStack.getType().equals(Material.LEGACY_RAW_FISH)) { //TODO does not work
+            if (ItemUtil.isFishType(itemStack.getType())) {
                 totalWorth += itemStack.getAmount() * plugin.getConfigSettings().getFishmongerReward();
                 player.getInventory().remove(itemStack);
             }
@@ -126,30 +129,5 @@ public class PlayerUtil {
         } else {
             IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.YELLOW + IO.getLang("interactFishmongerFailed"));
         }
-    }
-
-    public static void spawnEnemyVotsShipSpawn(final Player player) {
-        // TODO - spawn normal boat enemy ships if no mythicmobs
-        if (foliaLib == null && plugin != null) {
-            foliaLib = plugin.getFoliaLib();
-        }
-        foliaLib.getScheduler().runAtEntityLater(player, () -> {
-            final Location loc = player.getLocation();
-            final Vector inverseDirectionVec = loc.getDirection().normalize().multiply(-20);
-            loc.add(inverseDirectionVec);
-            loc.setY(60.0); // Below ocean surface
-            if (loc.getBlock().isLiquid()) {
-                // Spawn sound
-                final Optional<Skill> opt = plugin.getDependencies().getMythicMobs().getSkillManager().getSkill("VOTSNPCGalleonShipDeathSound");
-                if (opt.isPresent()) {
-                    final BukkitEntity bukkitEntity = new BukkitEntity(player);
-                    final SkillCaster c = plugin.getDependencies().getMythicMobs().getSkillManager().getCaster(bukkitEntity);
-                    final SkillMetadataImpl meta = new SkillMetadataImpl(SkillTriggers.API, c, bukkitEntity);
-                    opt.get().execute(meta);
-                }
-                plugin.getDependencies().getMythicMobs().getMobManager().spawnMob("VOTSNPCGalleon", loc);
-                IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.RED + IO.getLang("enemyVesselChase"));
-            }
-        }, 40L);
     }
 }

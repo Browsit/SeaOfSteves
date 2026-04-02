@@ -14,15 +14,14 @@ import com.codisimus.plugins.phatloots.PhatLoot;
 import com.codisimus.plugins.phatloots.PhatLootChest;
 import com.codisimus.plugins.phatloots.PhatLoots;
 import com.tcoded.folialib.FoliaLib;
-import me.gamercoder215.mobchip.EntityBrain;
-import me.gamercoder215.mobchip.ai.EntityAI;
-import me.gamercoder215.mobchip.ai.goal.PathfinderMeleeAttack;
-import me.gamercoder215.mobchip.bukkit.BukkitBrain;
 import net.md_5.bungee.api.ChatMessageType;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.api.event.PirateFishCaughtEvent;
 import org.browsit.seaofsteves.api.event.PirateOpenTreasureEvent;
-import org.browsit.seaofsteves.boss.lavablock.Tephra;
+import org.browsit.seaofsteves.boss.type.EnemyShip;
+import org.browsit.seaofsteves.boss.type.KingBlaze;
+import org.browsit.seaofsteves.boss.type.Shark;
+import org.browsit.seaofsteves.boss.type.lavablock.Tephra;
 import org.browsit.seaofsteves.depend.Dependencies;
 import org.browsit.seaofsteves.gear.type.boat.PirateDingy;
 import org.browsit.seaofsteves.gear.type.boat.PirateFireball;
@@ -36,7 +35,6 @@ import org.browsit.seaofsteves.settings.ConfigSettings;
 import org.browsit.seaofsteves.settings.GearSettings;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.ItemUtil;
-import org.browsit.seaofsteves.util.MythicUtil;
 import org.browsit.seaofsteves.util.NBTAPI;
 import org.browsit.seaofsteves.util.PlayerUtil;
 import org.browsit.seaofsteves.util.TerraUtil;
@@ -50,8 +48,6 @@ import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.Boat;
@@ -202,48 +198,32 @@ public class PlayerListener implements Listener {
         if (biome == null) {
             return;
         }
-        if (player.isInWater() || isLikelyInWater(player)) {
-            if (biome.equals(Biome.DEEP_LUKEWARM_OCEAN)|| biome.equals(Biome.DEEP_FROZEN_OCEAN)
-                    || biome.equals(Biome.DEEP_COLD_OCEAN) || biome.equals(Biome.DEEP_OCEAN)
-                    || biome.equals(Biome.WARM_OCEAN) || biome.equals(Biome.FROZEN_OCEAN)
-                    || biome.equals(Biome.COLD_OCEAN) || biome.equals(Biome.OCEAN)) {
-                // Player#isInWater can be true in high speed Catamaran
-                // TODO find more efficient way to check
-                for (final Entity nearby : player.getNearbyEntities(4, 4, 4)) {
-                    if (nearby instanceof Zombie && nearby.getName().contains("Catamaran")) {
-                        if (player.getLocation().add(0, -2, 0).getBlock().isLiquid()) {
-                            return;
-                        }
-                    }
-                }
+        if (isLikelyInWater(player)) {
+            if (biome.name().equalsIgnoreCase(bosses.getSharkBiome())) {
                 if (!lastEnteredOcean.containsKey(player.getUniqueId())) {
                     lastEnteredOcean.put(player.getUniqueId(), System.currentTimeMillis());
                     return;
                 }
-                if (System.currentTimeMillis() - lastEnteredOcean.get(player.getUniqueId()) > 5000L) { // 5 seconds
+                if (System.currentTimeMillis() - lastEnteredOcean.get(player.getUniqueId()) >
+                        bosses.getSharkRespawn() / 4) { // 5 seconds by default
                     IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.RED + IO.getLang("moveSharkWatch"));
                 }
-                if (System.currentTimeMillis() - lastEnteredOcean.get(player.getUniqueId()) > 11000L) { // 11 seconds
+                if (System.currentTimeMillis() - lastEnteredOcean.get(player.getUniqueId()) >
+                        bosses.getSharkRespawn() / 2) { // 10 seconds default
                     IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.DARK_RED + IO.getLang("moveSharkWarning"));
                 }
-                if (System.currentTimeMillis() - lastEnteredOcean.get(player.getUniqueId()) > 20000L) { // 20 seconds
-                    final Dolphin shark = (Dolphin) player.getWorld().spawnEntity(player.getLocation(), EntityType.DOLPHIN);
-                    shark.setTarget(player);
-
-                    try {
-                        final EntityBrain brain = BukkitBrain.getBrain(shark);
-                        final EntityAI target = brain.getTargetAI();
-                        final PathfinderMeleeAttack meleeAttack = new PathfinderMeleeAttack(shark, 1.0);
-                        target.put(meleeAttack, 0);
-                    } catch (final NoClassDefFoundError e) {
-                        shark.remove();
-                        plugin.getLogger().warning("Sharks are not yet supported on this server version!");
-                    }
-
+                if (System.currentTimeMillis() - lastEnteredOcean.get(player.getUniqueId()) >
+                        bosses.getSharkRespawn()) { // 20 seconds by default
+                    new Shark(plugin, player.getLocation(), player);
                     lastEnteredOcean.put(player.getUniqueId(), System.currentTimeMillis() - 11001L);
                 }
             }
         } else {
+            if (!config.isVotsEnabled() || isInOrOnVotsShipAtSea(player, biome)) {
+                if (random.nextInt(chance.getOceanSpawnEnemyShip()) == 1) {
+                    new EnemyShip(plugin, player);
+                }
+            }
             if (lastEnteredOcean.containsKey(player.getUniqueId())) {
                 for (final Entity nearby : player.getNearbyEntities(30, 20, 30)) {
                     if (nearby instanceof Dolphin) {
@@ -320,39 +300,9 @@ public class PlayerListener implements Listener {
                             }
                             if (!hasBossNearby) {
                                 final Location toSpawn = TerraUtil.getTerraBiomeCenter(terraBiome, event.getTo());
-                                LivingEntity boss;
-                                if (depends.getMythicMobs() != null
-                                        && !bosses.getKingBlazeMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
-                                    boss = MythicUtil.spawnMythicMobAtLocation(bosses.getKingBlazeMythic(), toSpawn);
-                                } else {
-                                    boss = (LivingEntity) player.getWorld().spawnEntity(toSpawn, EntityType.BLAZE);
-                                    boss.setCustomName(bossName);
-                                    boss.setCustomNameVisible(bosses.canKingBlazeUseNameTag());
-                                    boss.getAttribute(Attribute.GENERIC_SCALE).setBaseValue(bosses.getKingBlazeScale());
-                                    final double health = bosses.getKingBlazeHealth();
-                                    boss.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(health);
-                                    boss.setHealth(health);
-                                    if (bosses.canKingBlazeUseBossBar()) {
-                                        final BossBar bar = plugin.getServer().createBossBar(bossName, BarColor.RED, BarStyle.SOLID);
-                                        bar.setProgress(1.0);
-                                        for (final Entity nearby : boss.getNearbyEntities(50, 25, 50)) {
-                                            if (nearby instanceof Player) {
-                                                bar.addPlayer((Player) nearby);
-                                            }
-                                        }
-                                        bossBars.put(boss.getUniqueId(), bar);
-                                    }
-                                }
-                                if (boss == null) {
-                                    plugin.getLogger().severe("Unable to spawn king-blaze boss. Check boss.yml?");
-                                    return;
-                                }
-                                NBTAPI.addNBT(boss, "sos_boss", bossName);
-                                for (final Entity nearby : boss.getNearbyEntities(50, 25, 20)) {
-                                    if (nearby instanceof Player) {
-                                        IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.GREEN
-                                                + IO.getLang("bossSpawned").replace("<player>", player.getDisplayName() + ChatColor.GREEN));
-                                    }
+                                final KingBlaze boss = new KingBlaze(plugin, toSpawn);
+                                if (boss.getBossBar() != null) {
+                                    bossBars.put(boss.getEntity().getUniqueId(), boss.getBossBar());
                                 }
                                 plugin.getLogger().info(bossName + " spawned by player of UUID " + player.getUniqueId());
                             }
@@ -429,73 +379,18 @@ public class PlayerListener implements Listener {
             } else {
                 plugin.getLogger().severe("Invalid king-blaze drop material " + bosses.getKingBlazeDrop());
             }
+        } else if (entity instanceof Dolphin) {
+            final Material material = Material.getMaterial(bosses.getSharkDrop());
+            if (material != null) {
+                ItemUtil.addItem(player, new ItemStack(material));
+            } else {
+                plugin.getLogger().severe("Invalid shark drop material " + bosses.getSharkDrop());
+            }
         }
         if (bosses.canKingBlazeUseBossBar() && bossBars.containsKey(entity.getUniqueId())) {
             bossBars.get(entity.getUniqueId()).removeAll();
             bossBars.remove(entity.getUniqueId());
         }
-    }
-
-    private boolean isLikelyInWater(final Player player) {
-        // Check for player standing on boat
-        if (!player.isInsideVehicle()) {
-            for (final Entity nearby : player.getNearbyEntities(1, 1, 1)) {
-                if (nearby instanceof Boat) {
-                    if (player.getLocation().add(0, -1, 0).getBlock().getType().equals(Material.WATER)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        // Check for player floating above water
-        return !player.isInsideVehicle() && !player.isSneaking()
-                && player.getLocation().add(0, -1, 0).getBlock().getType().equals(Material.WATER);
-    }
-
-    private void runDetector(final Location location, final Player player) {
-        final World world = location.getWorld();
-        if (world == null) {
-            return;
-        }
-        final Location underFoot = new Location(world, location.getX(), location.getY() - 1, location.getZ());
-        final Material ground = world.getBlockAt(underFoot).getType();
-        if (ground.isAir()) {
-            return;
-        }
-        if (!ground.equals(Material.SAND)) {
-            IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.GRAY + IO.getLang("moveDetectSand"));
-            return;
-        }
-        int centerX = underFoot.getBlockX();
-        int centerY = underFoot.getBlockY();
-        int centerZ = underFoot.getBlockZ();
-        int radius = 9;
-        for (int x = centerX - radius; x <= centerX + radius; x++) {
-            for (int y= centerY - 6; y <= centerY; y++) {
-                for (int z = centerZ - radius; z <= centerZ + radius; z++) {
-                    final Block block = world.getBlockAt(x, y, z);
-                    if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST)) {
-                        final Location chestSurface = new Location(world, x, location.getY(), z);
-                        double distance = location.distance(chestSurface);
-                        if (distance > radius) distance = 9;
-                        final double soundPitch = ((radius / distance) / 10) + 1;
-                        player.playSound(block.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1.0f, (float)soundPitch);
-                        IO.sendMessage(player, ChatMessageType.ACTION_BAR, getDetectorMsg(distance));
-                        return;
-                    }
-                }
-            }
-        }
-        IO.sendMessage(player, ChatMessageType.ACTION_BAR, IO.getLang("moveDetectFailed"));
-    }
-
-    private String getDetectorMsg(final double distance) {
-        if (distance < 1.5) {
-            return ChatColor.RED + IO.getLang("moveDetectDig");
-        } else if (distance < 5.0) {
-            return ChatColor.YELLOW + IO.getLang("moveDetectCloser");
-        }
-        return ChatColor.GREEN + IO.getLang("moveDetectNearby");
     }
 
     @EventHandler
@@ -530,10 +425,12 @@ public class PlayerListener implements Listener {
             }
         } else if (event.getRightClicked().getType() == EntityType.CHEST_MINECART) {
             event.setCancelled(true);
+        } else if (event.getRightClicked().getType() == EntityType.CHEST_BOAT) {
+            if (NBTAPI.hasNBT(event.getRightClicked(), "sos_owner")) {
+                event.setCancelled(true);
+            }
         }
     }
-
-
 
     @SuppressWarnings("deprecation")
     @EventHandler(ignoreCancelled = false) // <-- Not redundant; do not remove
@@ -553,35 +450,13 @@ public class PlayerListener implements Listener {
                     return;
                 }
             }
-            final Block clickedBlock = event.getClickedBlock();
-            boolean isInDingy = player.getVehicle() != null && player.getVehicle() instanceof Boat;
-            boolean isInOrOnVotsShip = false;
             final Biome biome = TerraUtil.getBukkitBiome(event.getPlayer().getLocation());
             if (biome == null) {
                 return;
             }
-            if (isWaterBiome(biome)) {
-                for (final Entity e : player.getNearbyEntities(4, 4, 4)) {
-                    if (e instanceof Zombie) {
-                        if (VOTS_TYPE.contains(ChatColor.stripColor(e.getName())) && !e.isCustomNameVisible()
-                                && e.getTrackedBy().contains(player)) {
-                            isInOrOnVotsShip = true;
-                            break;
-                        }
-                    }
-                }
-                if (isInOrOnVotsShip) {
-                    if (depends.getMythicMobs() != null && depends.getMythicMobs().getItemManager().isMythicItem(hand)) {
-                        final String mythic = depends.getMythicMobs().getItemManager().getMythicTypeFromItem(hand);
-                        if (mythic.equals("VOTSDirectionControler")) {
-                            if (random.nextInt(chance.getOceanSpawnVotsNpc()) == 1) {
-                                PlayerUtil.spawnEnemyVotsShipSpawn(player);
-                            }
-                            return;
-                        }
-                    }
-                }
-            }
+            final Block clickedBlock = event.getClickedBlock();
+            boolean isInDingy = player.getVehicle() != null && player.getVehicle() instanceof Boat;
+            boolean isInOrOnVotsShip = isInOrOnVotsShipAtSea(player, biome);
             if (clickedBlock != null && (clickedBlock.getType().equals(Material.CHEST)
                     || clickedBlock.getType().equals(Material.TRAPPED_CHEST)
                     || clickedBlock.getType().equals(Material.BARREL))) {
@@ -697,29 +572,6 @@ public class PlayerListener implements Listener {
                     //player.getInventory().setItemInMainHand(hand);
                 }
             }
-
-            final Biome biome = TerraUtil.getBukkitBiome(event.getPlayer().getLocation());
-            if (biome == null) {
-                return;
-            }
-            if (isWaterBiome(biome)) {
-                for (final Entity e : player.getNearbyEntities(4, 4, 4)) {
-                    if (e instanceof Zombie) {
-                        if (VOTS_TYPE.contains(ChatColor.stripColor(e.getName())) && !e.isCustomNameVisible()
-                                && e.getTrackedBy().contains(player)) {
-                            if (depends.getMythicMobs() != null && depends.getMythicMobs().getItemManager().isMythicItem(hand)) {
-                                final String mythic = depends.getMythicMobs().getItemManager().getMythicTypeFromItem(hand);
-                                if (mythic.equals("VOTSDirectionControler")) {
-                                    if (random.nextInt(chance.getOceanSpawnVotsNpc()) == 1) {
-                                        PlayerUtil.spawnEnemyVotsShipSpawn(player);
-                                    }
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -768,10 +620,13 @@ public class PlayerListener implements Listener {
         event.getDrops().removeIf(ItemUtil::isGear);
         final Player player = event.getEntity();
         lastEnteredOcean.remove(event.getEntity().getUniqueId());
-        for (Entity e : event.getEntity().getNearbyEntities(30, 20, 30)) {
+        for (Entity e : event.getEntity().getNearbyEntities(35, 20, 35)) {
             if (e instanceof Dolphin) {
                 e.remove();
             }
+        }
+        if (event.getDeathMessage() != null && event.getDeathMessage().contains("Dolphin")) {
+            event.setDeathMessage(event.getDeathMessage().replace("Dolphin", bosses.getSharkName()));
         }
         final Pirate pirate = plugin.getPirate(player.getUniqueId());
         IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.GREEN + IO.getLang("deathTreasureSold")
@@ -793,11 +648,98 @@ public class PlayerListener implements Listener {
         PlayerUtil.adios(event.getPlayer());
     }
 
-    private boolean isWaterBiome(final Biome biome) {
-        return biome.equals(Biome.DEEP_LUKEWARM_OCEAN) || biome.equals(Biome.DEEP_FROZEN_OCEAN)
-                || biome.equals(Biome.DEEP_COLD_OCEAN) || biome.equals(Biome.DEEP_OCEAN)
-                || biome.equals(Biome.WARM_OCEAN) || biome.equals(Biome.FROZEN_OCEAN)
-                || biome.equals(Biome.COLD_OCEAN) || biome.equals(Biome.OCEAN)
-                || biome.equals(Biome.FROZEN_RIVER) || biome.equals(Biome.RIVER);
+    private boolean isInOrOnVotsShipAtSea(final Player player, final Biome biome) {
+        if (WorldUtil.isOceanBiome(biome)) {
+            for (final Entity e : player.getNearbyEntities(4, 4, 4)) {
+                if (e instanceof Zombie) {
+                    if (VOTS_TYPE.contains(ChatColor.stripColor(e.getName())) && !e.isCustomNameVisible()
+                            && e.getTrackedBy().contains(player)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Attempts to check whether a player is effectively in water, i.e. jumping on surface or standing on Boat
+     *
+     * @param player the aquaphobic player
+     * @return true if reasonably sure that toes are wet
+     */
+    private boolean isLikelyInWater(final Player player) {
+        // Player#isInWater can be true in high speed Catamaran
+        // TODO find more efficient way to check
+        for (final Entity nearby : player.getNearbyEntities(4, 4, 4)) {
+            if (nearby instanceof Zombie && nearby.getName().contains("Catamaran")) {
+                if (player.getLocation().add(0, -2, 0).getBlock().isLiquid()) {
+                    return false;
+                }
+            }
+        }
+        // Check for player blatantly in water
+        if (player.isInWater()) {
+            return true;
+        }
+        // Check for player standing on vanilla boat
+        if (!player.isInsideVehicle()) {
+            for (final Entity nearby : player.getNearbyEntities(1, 1, 1)) {
+                if (nearby instanceof Boat) {
+                    if (player.getLocation().add(0, -1, 0).getBlock().getType().equals(Material.WATER)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        // Check for player floating above water
+        return !player.isInsideVehicle() && !player.isSneaking()
+                && player.getLocation().add(0, -1, 0).getBlock().getType().equals(Material.WATER);
+    }
+
+    private void runDetector(final Location location, final Player player) {
+        final World world = location.getWorld();
+        if (world == null) {
+            return;
+        }
+        final Location underFoot = new Location(world, location.getX(), location.getY() - 1, location.getZ());
+        final Material ground = world.getBlockAt(underFoot).getType();
+        if (ground.isAir()) {
+            return;
+        }
+        if (!ground.equals(Material.SAND)) {
+            IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.GRAY + IO.getLang("moveDetectSand"));
+            return;
+        }
+        int centerX = underFoot.getBlockX();
+        int centerY = underFoot.getBlockY();
+        int centerZ = underFoot.getBlockZ();
+        int radius = 9;
+        for (int x = centerX - radius; x <= centerX + radius; x++) {
+            for (int y= centerY - 6; y <= centerY; y++) {
+                for (int z = centerZ - radius; z <= centerZ + radius; z++) {
+                    final Block block = world.getBlockAt(x, y, z);
+                    if (block.getType().equals(Material.CHEST) || block.getType().equals(Material.TRAPPED_CHEST)) {
+                        final Location chestSurface = new Location(world, x, location.getY(), z);
+                        double distance = location.distance(chestSurface);
+                        if (distance > radius) distance = 9;
+                        final double soundPitch = ((radius / distance) / 10) + 1;
+                        player.playSound(block.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, 1.0f, (float)soundPitch);
+                        IO.sendMessage(player, ChatMessageType.ACTION_BAR, getDetectorMsg(distance));
+                        return;
+                    }
+                }
+            }
+        }
+        IO.sendMessage(player, ChatMessageType.ACTION_BAR, IO.getLang("moveDetectFailed"));
+    }
+
+    private String getDetectorMsg(final double distance) {
+        if (distance < 1.5) {
+            return ChatColor.RED + IO.getLang("moveDetectDig");
+        } else if (distance < 5.0) {
+            return ChatColor.YELLOW + IO.getLang("moveDetectCloser");
+        }
+        return ChatColor.GREEN + IO.getLang("moveDetectNearby");
     }
 }

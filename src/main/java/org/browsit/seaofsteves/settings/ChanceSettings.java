@@ -17,7 +17,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 public class ChanceSettings {
     private final SeaOfSteves plugin;
     private int oceanSpawnDrowned;
-    private int oceanSpawnVotsNpc;
+    private int oceanSpawnEnemyShip;
     private int islandSpawnSkeletonWithBow;
     private int islandSpawnCaptain;
     private int volcanoSpawnMagmaCube;
@@ -35,12 +35,12 @@ public class ChanceSettings {
         this.oceanSpawnDrowned = oceanSpawnDrowned;
     }
 
-    public int getOceanSpawnVotsNpc() {
-        return oceanSpawnVotsNpc;
+    public int getOceanSpawnEnemyShip() {
+        return oceanSpawnEnemyShip;
     }
 
-    public void setOceanSpawnVotsNpc(final int oceanSpawnVotsNpc) {
-        this.oceanSpawnVotsNpc = oceanSpawnVotsNpc;
+    public void setOceanSpawnEnemyShip(final int oceanSpawnEnemyShip) {
+        this.oceanSpawnEnemyShip = oceanSpawnEnemyShip;
     }
 
     public int getIslandSpawnSkeletonWithBow() {
@@ -76,9 +76,9 @@ public class ChanceSettings {
     }
 
     public void load() {
-        final FileConfiguration cfg = IO.getGear();
+        final FileConfiguration cfg = IO.getChance();
         oceanSpawnDrowned = cfg.getInt("sos.ocean.spawn-drowned", 65);
-        oceanSpawnVotsNpc = cfg.getInt("sos.ocean.spawn-vots-npc", 250);
+        oceanSpawnEnemyShip = cfg.getInt("sos.ocean.spawn-enemy-ship", 1000);
         islandSpawnSkeletonWithBow = cfg.getInt("sos.ocean.spawn-skeleton-with-bow", 10);
         islandSpawnCaptain = cfg.getInt("sos.ocean.spawn-captain", 5);
         volcanoSpawnMagmaCube = cfg.getInt("sos.ocean.spawn-magma-cube", 40);

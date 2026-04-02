@@ -167,7 +167,7 @@ public class SeaOfSteves extends JavaPlugin {
         boss.load();
     }
 
-    public FoliaLib getFoliaLib() {
+    public @NotNull FoliaLib getFoliaLib() {
         return foliaLib;
     }
 

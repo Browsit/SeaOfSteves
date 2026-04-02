@@ -169,9 +169,9 @@ public class ProjectileListener implements Listener {
         if (!(projectile instanceof Fireball)) {
             return;
         }
-        if (!(projectile.getShooter() instanceof Player)) {
+        /*if (!(projectile.getShooter() instanceof Player)) {
             return;
-        }
+        }*/
         projectiles.add(projectile.getUniqueId());
         foliaLib.getScheduler().runAtEntityTimer(projectile, task -> {
             updateProjectile(projectile);

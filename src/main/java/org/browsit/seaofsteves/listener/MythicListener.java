@@ -123,6 +123,9 @@ public class MythicListener implements Listener {
         if (!config.isVotsEnabled()) {
             return;
         }
+        if (!(event.getPassenger() instanceof Player)) {
+            return;
+        }
         final ActiveModel am = event.getVehicle();
         final String str = am.getBlueprint().getName().toLowerCase().replace("elitecreatures", "");
         final String name = str.substring(0, 1).toUpperCase() + str.substring(1);
@@ -132,7 +135,35 @@ public class MythicListener implements Listener {
         if (event.getVehicle().getMountManager().isPresent() && am.getMountManager().get().hasRiders()) {
             event.setCancelled(true);
         } else {
-            ItemUtil.renewGearNaval((Player) event.getPassenger(), name);
+            final Player player = (Player) event.getPassenger();
+
+            // Remove auto-generated controllers
+            foliaLib.getScheduler().runAtEntityLater(player, () -> {
+                final ItemStack[] contents = player.getInventory().getContents();
+                for (final ItemStack item : contents) {
+                    if (item == null) {
+                        continue;
+                    }
+                    final String mythic = depends.getMythicMobs().getItemManager().getMythicTypeFromItem(item);
+                    if (mythic != null && mythic.endsWith("Controler")) {
+                        player.getInventory().remove(item);
+                    }
+                }
+            }, 4L);
+            // Spawn controllers (and other gear) where desirable
+            foliaLib.getScheduler().runAtEntityLater(player, () -> ItemUtil.renewGearNaval(player, name), 8L);
+            // Ensure there are no duplicate controllers in hotbar
+            foliaLib.getScheduler().runAtEntityLater(player, () -> {
+                for (int slot = 0; slot < 8; slot++) {
+                    final ItemStack item = player.getInventory().getItem(slot);
+                    if (item == null) {
+                        continue;
+                    }
+                    if (item.getAmount() > 1) {
+                        item.setAmount(1);
+                    }
+                }
+            }, 20L);
         }
     }
 

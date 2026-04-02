@@ -1,5 +1,5 @@
 name: SeaOfSteves
-version: 0.0.6
+version: 0.0.7
 description: Pirate gameplay plugin for Minecraft servers.
 folia-supported: true
 api-version: 1.20.5
@@ -19,6 +19,9 @@ permissions:
     default: true
   seaofsteves.sos.reload:
     description: Reload plugin data
+    default: op
+  seaofsteves.sos.spawn:
+    description: Spawn boss if enabled
     default: op
   seaofsteves.sos.tephra:
     description: Spawn tephra at location

@@ -12,10 +12,12 @@ package org.browsit.seaofsteves.listener;
 
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.api.event.PirateEnemyPlunderedEvent;
+import org.browsit.seaofsteves.depend.Dependencies;
 import org.browsit.seaofsteves.settings.ChanceSettings;
 import org.browsit.seaofsteves.settings.ConfigSettings;
 import org.browsit.seaofsteves.settings.GearSettings;
 import org.browsit.seaofsteves.util.ItemUtil;
+import org.browsit.seaofsteves.util.NBTAPI;
 import org.browsit.seaofsteves.util.TerraUtil;
 import org.browsit.seaofsteves.util.WorldUtil;
 import org.bukkit.ChatColor;
@@ -31,10 +33,12 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Villager;
+import org.bukkit.entity.WitherSkeleton;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityBreedEvent;
+import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
@@ -48,6 +52,7 @@ import java.util.Random;
 
 public class EntityListener implements Listener {
     private final SeaOfSteves plugin;
+    private final Dependencies depends;
     private final ChanceSettings chance;
     private final ConfigSettings config;
     private final GearSettings gear;
@@ -55,6 +60,7 @@ public class EntityListener implements Listener {
 
     public EntityListener(final SeaOfSteves plugin) {
         this.plugin = plugin;
+        this.depends = plugin.getDependencies();
         this.chance = plugin.getChanceSettings();
         this.config = plugin.getConfigSettings();
         this.gear = plugin.getGearSettings();
@@ -65,16 +71,13 @@ public class EntityListener implements Listener {
         if (!config.isCreatureEnabled()) {
             return;
         }
-        if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.CUSTOM)
-                || event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.SLIME_SPLIT)) {
-            return;
-        }
         final LivingEntity entity = event.getEntity();
         if (!WorldUtil.isAllowedWorld(entity.getWorld().getName())) {
             return;
         }
-        // Ignore VOTS spawn
-        if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.PATROL)) {
+        if (event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.CUSTOM)
+                || event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.SLIME_SPLIT)
+                || event.getSpawnReason().equals(CreatureSpawnEvent.SpawnReason.PATROL)) {
             return;
         }
         /*if (entity.getLocation().getBlock().getType().equals(Material.WATER)) {
@@ -141,9 +144,19 @@ public class EntityListener implements Listener {
             }
         } else if (entity.getType().equals(EntityType.WITCH)) {
             if (random.nextInt(chance.getIslandSpawnCaptain()) == 1) {
-                final Entity captain = entity.getWorld().spawnEntity(entity.getLocation(), EntityType.WITHER_SKELETON);
+                final WitherSkeleton captain = (WitherSkeleton) entity.getWorld().spawnEntity(entity.getLocation(), EntityType.WITHER_SKELETON);
                 captain.setCustomName(ChatColor.RED + config.getCreatureNameCaptain());
                 captain.setCustomNameVisible(true);
+                if (depends.getMythicMobs() != null && depends.isVotsPresent()) {
+                    final ItemStack is = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack("VOTSAdmiralHat");
+                    if (is != null && captain.getEquipment() != null) {
+                        captain.getEquipment().setHelmet(is);
+                    }
+                    /*final Optional<MythicItem> mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItem("VOTSAdmiralHat");
+                    if (mythic.isPresent()) {
+
+                    }*/
+                }
             }
         }
     }
@@ -279,19 +292,51 @@ public class EntityListener implements Listener {
     }
 
     @EventHandler
-    public void onEntityDeathEvent(final EntityDeathEvent event) {
-        if (!WorldUtil.isAllowedWorld(event.getEntity().getWorld().getName())) {
+    public void onEntityCombust(final EntityCombustEvent event) {
+        if (!config.isCreatureEnabled()) {
             return;
         }
-        if (config.isCreatureEnabled() && event.getEntity().getType().equals(EntityType.WITHER_SKELETON)
-                && event.getEntity().getCustomName() != null
-                && event.getEntity().getCustomName().equals(ChatColor.RED + "Captain")) {
-            ItemUtil.addItem(event.getEntity().getKiller(), new ItemStack(Material.GOLD_NUGGET));
+        if (event.getEntity().getLocation().getWorld() != null
+                && !WorldUtil.isAllowedWorld(event.getEntity().getLocation().getWorld().getName())) {
+            return;
         }
-        if (event.getEntity() instanceof Player) {
+        final Entity entity = event.getEntity();
+        if (entity.getType().equals(EntityType.ZOMBIE) && entity.getVehicle() != null) {
+            final String owner = NBTAPI.getNBT(entity.getVehicle(), "sos_owner");
+            if (owner == null) {
+                return;
+            }
+            if (owner.equals("sos_zombie_captain")) {
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEntityDeathEvent(final EntityDeathEvent event) {
+        final LivingEntity entity = event.getEntity();
+        if (!WorldUtil.isAllowedWorld(entity.getWorld().getName())) {
+            return;
+        }
+        if (config.isCreatureEnabled() && entity.getType().equals(EntityType.WITHER_SKELETON)
+                && entity.getCustomName() != null && entity.getCustomName().equals(ChatColor.RED + "Captain")) {
+            ItemUtil.addItem(entity.getKiller(), new ItemStack(Material.GOLD_NUGGET));
+        } else if (entity.getType().equals(EntityType.ZOMBIE)) {
+            if (entity.getVehicle() == null) {
+                return;
+            }
+            final String owner = NBTAPI.getNBT(entity.getVehicle(), "sos_owner");
+            if (owner == null) {
+                return;
+            }
+            if (owner.equals("sos_zombie_captain")) {
+                entity.getVehicle().remove();
+                ItemUtil.addItem(entity.getKiller(), new ItemStack(Material.IRON_INGOT));
+            }
+        } else if (entity instanceof Player) {
             final Player player = event.getEntity().getKiller();
             if (player == null) { return; }
-            final Player plundered = (Player) event.getEntity();
+            final Player plundered = (Player) entity;
 
             final PirateEnemyPlunderedEvent pEvent = new PirateEnemyPlunderedEvent(
                     plugin.getPirate(player.getUniqueId()), plugin.getPirate(plundered.getUniqueId()));

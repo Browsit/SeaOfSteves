@@ -24,7 +24,7 @@ import org.browsit.seaofsteves.util.NBTAPI;
 import org.browsit.seaofsteves.util.WorldUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Boat;
-import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -65,12 +65,12 @@ public class VehicleListener implements Listener {
         }
         NBTAPI.addNBT(event.getEntity(), "sos_owner", player.getUniqueId().toString());
         foliaLib.getScheduler().runAtEntityLater(player, task -> {
-            plugin.getLogger().info(player + " placed vessel at " + event.getEntity().getLocation());
             player.getInventory().setItem(gear.getDingySlot(), PirateEmpty.get(player));
+            /*plugin.getLogger().info(player + " placed vessel at " + event.getEntity().getLocation());
             for (Entity nearby : player.getNearbyEntities(10,10,10)) {
                 plugin.getLogger().info(nearby.getType().name());
                 plugin.getLogger().info(NBTAPI.getNBT(event.getEntity(), "sos_owner"));
-            }
+            }*/
         }, 2L);
     }
 
@@ -82,6 +82,7 @@ public class VehicleListener implements Listener {
         if (!gear.isDingyEnabled()) {
             return;
         }
+        if (event.getEntered().getType().equals(EntityType.DOLPHIN)) { event.setCancelled(true); }
         if (!(event.getEntered() instanceof Player)) { return; }
         if (!(event.getVehicle() instanceof Boat)) { return; }
         if (NBTAPI.hasNBT(event.getVehicle(), "sos_owner")) {

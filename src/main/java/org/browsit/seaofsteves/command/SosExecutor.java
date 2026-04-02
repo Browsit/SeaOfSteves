@@ -11,24 +11,31 @@
 package org.browsit.seaofsteves.command;
 
 import org.browsit.seaofsteves.SeaOfSteves;
-import org.browsit.seaofsteves.boss.lavablock.Tephra;
+import org.browsit.seaofsteves.boss.type.EnemyShip;
+import org.browsit.seaofsteves.boss.type.KingBlaze;
+import org.browsit.seaofsteves.boss.type.Shark;
+import org.browsit.seaofsteves.boss.type.lavablock.Tephra;
 import org.browsit.seaofsteves.player.Pirate;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.ItemUtil;
 import org.bukkit.ChatColor;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class SosExecutor implements CommandExecutor {
+public class SosExecutor implements CommandExecutor, TabExecutor {
     private final SeaOfSteves plugin;
 
     public SosExecutor(SeaOfSteves plugin) {
@@ -60,6 +67,43 @@ public class SosExecutor implements CommandExecutor {
                         .replace("<worlds>", ChatColor.RESET + worlds));
                 return true;
             }
+            if (args[0].equalsIgnoreCase("spawn")) {
+                if (!sender.hasPermission("seaofsteves.sos.spawn")) {
+                    sender.sendMessage(ChatColor.RED + IO.getLang("noPermission"));
+                    return false;
+                }
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage(ChatColor.RED + IO.getLang("consoleError"));
+                    return false;
+                }
+                if (args.length < 2) {
+                    sender.sendMessage(ChatColor.RED + IO.getLang("commandError"));
+                    return false;
+                }
+                final Player player = (Player)sender;
+                if (args[1].equalsIgnoreCase("KingBlaze")) {
+                    if (!plugin.getBossSettings().isKingBlazeEnabled()) {
+                        sender.sendMessage(ChatColor.RED + "King Blaze is not enabled, see boss.yml ");
+                        return false;
+                    }
+                    final Block block = player.getTargetBlock(null, 50);
+                    new KingBlaze(plugin, block.getLocation());
+                } else if (args[1].equalsIgnoreCase("Shark")) {
+                    if (!plugin.getBossSettings().isSharkEnabled()) {
+                        sender.sendMessage(ChatColor.RED + "Shark is not enabled, see boss.yml ");
+                        return false;
+                    }
+                    final Block b = player.getTargetBlock(null, 50);
+                    new Shark(plugin, b.getLocation(), player);
+                } else if (args[1].equalsIgnoreCase("EnemyShip")) {
+                    if (plugin.getChanceSettings().getOceanSpawnEnemyShip() < 1) {
+                        sender.sendMessage(ChatColor.RED + "Enemy ships are not enabled, see chance.yml ");
+                        return false;
+                    }
+                    new EnemyShip(plugin, player);
+                }
+                return true;
+            }
             if (args[0].equals("tephra")) {
                 if (!sender.hasPermission("seaofsteves.sos.tephra")) {
                     sender.sendMessage(ChatColor.RED + IO.getLang("noPermission"));
@@ -72,6 +116,7 @@ public class SosExecutor implements CommandExecutor {
                 new Tephra(plugin, ((Player)sender).getLocation());
                 return true;
             }
+            // TODO link with MCPets to spend points on spawning and/or unlocking pet
             if (args[0].equals("top")) {
                 if (!sender.hasPermission("seaofsteves.sos.top")) {
                     sender.sendMessage(ChatColor.RED + IO.getLang("noPermission"));
@@ -91,6 +136,15 @@ public class SosExecutor implements CommandExecutor {
             }
         }
         return false;
+    }
+
+    @Override
+    public @Nullable List<String> onTabComplete(@NotNull final CommandSender sender, @NotNull final Command command,
+                                                @NotNull final String label, final @NotNull String[] args) {
+        if (command.getName().equalsIgnoreCase("sos")) {
+
+        }
+        return new ArrayList<>();
     }
 
     private boolean showInfo(CommandSender sender) {

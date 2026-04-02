@@ -26,6 +26,14 @@ public class BossSettings {
     private boolean kingBlazeUseBossBar;
     private boolean kingBlazeUseNameTag;
     private String kingBlazeMythic;
+    private boolean sharkEnabled;
+    private String sharkBiome;
+    private String sharkName;
+    private String sharkDrop;
+    private double sharkHealth;
+    private long sharkRespawn;
+    private double sharkScale;
+    private String sharkMythic;
 
     public BossSettings(SeaOfSteves plugin) {
         this.plugin = plugin;
@@ -111,18 +119,91 @@ public class BossSettings {
         this.kingBlazeMythic = kingBlazeMythic;
     }
 
+    public boolean isSharkEnabled() {
+        return sharkEnabled;
+    }
+
+    public void setSharkEnabled(final boolean sharkEnabled) {
+        this.sharkEnabled = sharkEnabled;
+    }
+
+    public String getSharkBiome() {
+        return sharkBiome;
+    }
+
+    public void setSharkBiome(final String sharkBiome) {
+        this.sharkBiome = sharkBiome;
+    }
+
+    public String getSharkName() {
+        return sharkName;
+    }
+
+    public void setSharkName(final String sharkName) {
+        this.sharkName = sharkName;
+    }
+
+    public String getSharkDrop() {
+        return sharkDrop;
+    }
+
+    public void setSharkDrop(final String sharkDrop) {
+        this.sharkDrop = sharkDrop;
+    }
+
+    public double getSharkHealth() {
+        return sharkHealth;
+    }
+
+    public void setSharkHealth(final double sharkHealth) {
+        this.sharkHealth = sharkHealth;
+    }
+
+    public long getSharkRespawn() {
+        return sharkRespawn;
+    }
+
+    public void setSharkRespawn(final long sharkRespawn) {
+        this.sharkRespawn = sharkRespawn;
+    }
+
+    public double getSharkScale() {
+        return sharkScale;
+    }
+
+    public void setSharkScale(final double sharkScale) {
+        this.sharkScale = sharkScale;
+    }
+
+    public String getSharkMythic() {
+        return sharkMythic;
+    }
+
+    public void setSharkMythic(final String sharkMythic) {
+        this.sharkMythic = sharkMythic;
+    }
+
     public void load() {
-        final FileConfiguration cfg = IO.getBosses();
-        final String bossName = "king-blaze";
-        kingBlazeEnabled = cfg.getBoolean("sos.boss." + bossName + ".enabled", true);
-        kingBlazeBiome = cfg.getString("sos.boss." + bossName + ".biome", "VOLCANO_PIT");
-        kingBlazeName = cfg.getString("sos.boss." + bossName + ".name", "King Blaze");
-        kingBlazeDrop = cfg.getString("sos.boss." + bossName + ".drop", "BLAZE_ROD");
-        kingBlazeHealth = cfg.getDouble("sos.boss." + bossName + ".health", 50.0);
-        kingBlazeRespawn = cfg.getLong("sos.boss." + bossName + ".respawn", 900000L);
-        kingBlazeScale = cfg.getDouble("sos.boss." + bossName + ".scale", 4.0);
-        kingBlazeUseBossBar = cfg.getBoolean("sos.boss." + bossName + ".use-bossbar", true);
-        kingBlazeUseNameTag = cfg.getBoolean("sos.boss." + bossName + ".use-nametag", true);
-        kingBlazeMythic = cfg.getString("sos.boss." + bossName + ".mythic", "NAME_OF_MOB_TO_USE_INSTEAD");
+        final FileConfiguration cfg = IO.getBoss();
+        final String prefixKingBlaze = "sos.boss.king-blaze.";
+        final String prefixShark = "sos.boss.shark.";
+        kingBlazeEnabled = cfg.getBoolean(prefixKingBlaze + "enabled", true);
+        kingBlazeBiome = cfg.getString(prefixKingBlaze + "biome", "VOLCANO_PIT");
+        kingBlazeName = cfg.getString(prefixKingBlaze + "name", "King Blaze");
+        kingBlazeDrop = cfg.getString(prefixKingBlaze + "drop", "BLAZE_ROD");
+        kingBlazeHealth = cfg.getDouble(prefixKingBlaze + "health", 50.0);
+        kingBlazeRespawn = cfg.getLong(prefixKingBlaze + "respawn", 900000L);
+        kingBlazeScale = cfg.getDouble(prefixKingBlaze + "scale", 4.0);
+        kingBlazeUseBossBar = cfg.getBoolean(prefixKingBlaze + "use-bossbar", true);
+        kingBlazeUseNameTag = cfg.getBoolean(prefixKingBlaze + "use-nametag", true);
+        kingBlazeMythic = cfg.getString(prefixKingBlaze + "mythic", "NAME_OF_MOB_TO_USE_INSTEAD");
+        sharkEnabled = cfg.getBoolean(prefixShark + "enabled", true);
+        sharkBiome = cfg.getString(prefixShark + "biome", "DEEP_OCEAN");
+        sharkName = cfg.getString(prefixShark + "name", "Shark");
+        sharkDrop = cfg.getString(prefixShark + "drop", "RAW_COD");
+        sharkHealth = cfg.getDouble(prefixShark + "health", 10.0);
+        sharkRespawn = cfg.getLong(prefixShark + "respawn", 20000L);
+        sharkScale = cfg.getDouble(prefixShark + "scale", 1.1);
+        sharkMythic = cfg.getString(prefixShark + "mythic", "NAME_OF_MOB_TO_USE_INSTEAD");
     }
 }

@@ -8,7 +8,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package org.browsit.seaofsteves.boss.lavablock;
+package org.browsit.seaofsteves.boss.type.lavablock;
 
 import com.tcoded.folialib.FoliaLib;
 import com.tcoded.folialib.wrapper.task.WrappedTask;

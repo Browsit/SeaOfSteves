@@ -201,7 +201,7 @@
         <dependency>
             <groupId>com.github.datatags.MobChipLite</groupId>
             <artifactId>mobchip-bukkit</artifactId>
-            <version>1.10.16</version>
+            <version>1.10.19</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

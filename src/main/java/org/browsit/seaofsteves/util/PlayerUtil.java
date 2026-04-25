@@ -14,6 +14,7 @@ import com.tcoded.folialib.FoliaLib;
 import io.lumine.mythic.core.mobs.ActiveMob;
 import net.md_5.bungee.api.ChatMessageType;
 import org.browsit.seaofsteves.SeaOfSteves;
+import org.browsit.seaofsteves.api.event.PirateAcquirePetEvent;
 import org.browsit.seaofsteves.api.event.PirateSellTreasureEvent;
 import org.browsit.seaofsteves.player.Pirate;
 import org.bukkit.Bukkit;
@@ -21,7 +22,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
@@ -128,6 +131,45 @@ public class PlayerUtil {
                     + amount + " points");
         } else {
             IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.YELLOW + IO.getLang("interactFishmongerFailed"));
+        }
+    }
+
+    // TODO - impose limit on dogs
+    public static void buyDog(final Player player, final Entity tamer) {
+        final Material material = Material.matchMaterial(plugin.getConfigSettings().getTamerMaterial());
+        if (material == null) {
+            plugin.getLogger().severe("Material for tamers in config.yml file was invalid.");
+            return;
+        }
+        final ItemStack cost = new ItemStack(material);
+        boolean found = false;
+        for (final ItemStack itemStack : player.getInventory().getStorageContents()) {
+            if (itemStack == null || itemStack.getType() == Material.AIR) {
+                continue;
+            }
+            if (ItemUtil.isGear(itemStack)) {
+                continue;
+            }
+            if (itemStack.getType().name().equals(cost.getType().name())) {
+                player.getInventory().removeItem(itemStack);
+                found = true;
+            }
+        }
+        if (found) {
+            final Wolf wolf = (Wolf) tamer.getWorld().spawnEntity(tamer.getLocation(), EntityType.WOLF);
+            wolf.setOwner(player);
+            wolf.setCustomName(player.getName() + "'s Dog");
+            wolf.setCustomNameVisible(true);
+            IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.GREEN + IO.getLang("interactTamerSold"));
+            player.playSound(player.getLocation(), Sound.ENTITY_WOLF_AMBIENT, 1.0f, 1.0f);
+            final PirateAcquirePetEvent pEvent = new PirateAcquirePetEvent(
+                    plugin.getPirate(player.getUniqueId()), tamer, cost);
+            plugin.getServer().getPluginManager().callEvent(pEvent);
+            plugin.getLogger().info(player.getName() + " bought dog from " + plugin.getConfigSettings().getTamerName() + " for "
+                    + cost.getType().name());
+        } else {
+            IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.YELLOW + IO.getLang("interactTamerFailed")
+                    .replace("<material>", cost.getType().name()));
         }
     }
 }

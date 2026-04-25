@@ -13,6 +13,7 @@ package org.browsit.seaofsteves.listener;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.api.event.PirateEnemyPlunderedEvent;
 import org.browsit.seaofsteves.depend.Dependencies;
+import org.browsit.seaofsteves.settings.BossSettings;
 import org.browsit.seaofsteves.settings.ChanceSettings;
 import org.browsit.seaofsteves.settings.ConfigSettings;
 import org.browsit.seaofsteves.settings.GearSettings;
@@ -52,6 +53,7 @@ import java.util.Random;
 
 public class EntityListener implements Listener {
     private final SeaOfSteves plugin;
+    private final BossSettings bosses;
     private final Dependencies depends;
     private final ChanceSettings chance;
     private final ConfigSettings config;
@@ -60,6 +62,7 @@ public class EntityListener implements Listener {
 
     public EntityListener(final SeaOfSteves plugin) {
         this.plugin = plugin;
+        this.bosses = plugin.getBossSettings();
         this.depends = plugin.getDependencies();
         this.chance = plugin.getChanceSettings();
         this.config = plugin.getConfigSettings();
@@ -188,12 +191,16 @@ public class EntityListener implements Listener {
         }
         for (final Entity entity : event.getEntities()) {
             if (entity instanceof Villager) {
-                if (((Villager)entity).getProfession().equals(Villager.Profession.FISHERMAN) ||
-                        ((Villager)entity).getProfession().equals(Villager.Profession.CARTOGRAPHER)) {
+                if (((Villager)entity).getProfession().equals(Villager.Profession.FISHERMAN)) {
                     if (!config.isFishmongerEnabled()) {
                         return;
                     }
                     entity.setCustomName(config.getFishmongerName());
+                } else if (((Villager)entity).getProfession().equals(Villager.Profession.CARTOGRAPHER)) {
+                    if (!config.isTamerEnabled()) {
+                        return;
+                    }
+                    entity.setCustomName(config.getTamerName());
                 } else {
                     if (!config.isMerchantEnabled()) {
                         return;
@@ -210,16 +217,20 @@ public class EntityListener implements Listener {
         if (!WorldUtil.isAllowedWorld(event.getEntity().getWorld().getName())) {
             return;
         }
-        if (!config.isFishmongerEnabled()) {
-            return;
-        }
         final Villager villager = event.getEntity();
         plugin.getFoliaLib().getScheduler().runAtEntityLater(villager, task -> {
-            if (villager.getProfession().equals(Villager.Profession.FISHERMAN) ||
-                    villager.getProfession().equals(Villager.Profession.CARTOGRAPHER)) {
+            if (villager.getProfession().equals(Villager.Profession.FISHERMAN)) {
+                if (!config.isFishmongerEnabled()) {
+                    return;
+                }
                 villager.setCustomName(config.getFishmongerName());
-                villager.setCustomNameVisible(true);
+            } else if (villager.getProfession().equals(Villager.Profession.CARTOGRAPHER)) {
+                if (!config.isTamerEnabled()) {
+                    return;
+                }
+                villager.setCustomName(config.getTamerName());
             }
+            villager.setCustomNameVisible(true);
         }, 2L);
     }
 
@@ -331,7 +342,9 @@ public class EntityListener implements Listener {
             }
             if (owner.equals("sos_zombie_captain")) {
                 entity.getVehicle().remove();
-                ItemUtil.addItem(entity.getKiller(), new ItemStack(Material.IRON_INGOT));
+                final Material drop = Material.matchMaterial(bosses.getEnemyShipDrop());
+                if (drop == null) { return; }
+                ItemUtil.addItem(entity.getKiller(), new ItemStack(drop));
             }
         } else if (entity instanceof Player) {
             final Player player = event.getEntity().getKiller();

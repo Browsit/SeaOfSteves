@@ -25,11 +25,13 @@ public class ConfigSettings {
     private String eruptionMaterial;
     private int eruptionStartHeight;
     private boolean eruptionCancelDrop;
+    private boolean evenmorefishEnabled;
     private boolean fishmongerEnabled;
     private String fishmongerName;
     private int fishmongerReward;
     private boolean fishmongerUseVault;
     private boolean generalBlockExplode;
+    private boolean mcpetsEnabled;
     private boolean merchantEnabled;
     private String merchantName;
     private int merchantReward;
@@ -38,11 +40,14 @@ public class ConfigSettings {
     private boolean multiverseResetUseBossbar;
     private double multiverseResetRegenHours;
     private boolean multiverseResetPurgeDynmap;
-    private boolean votsEnabled;
-    private final Collection<String> votsShips = new LinkedHashSet<>();
     private boolean phatLootEnabled;
     private String phatLootNameBarrel;
     private String phatLootNameChest;
+    private boolean tamerEnabled;
+    private String tamerName;
+    private String tamerMaterial;
+    private boolean votsEnabled;
+    private final Collection<String> votsShips = new LinkedHashSet<>();
     private final Collection<String> worldNames = new ConcurrentSkipListSet<>();
 
     public ConfigSettings(final SeaOfSteves plugin) {
@@ -97,6 +102,14 @@ public class ConfigSettings {
         this.eruptionCancelDrop = eruptionCancelDrop;
     }
 
+    public boolean isEvenmorefishEnabled() {
+        return evenmorefishEnabled;
+    }
+
+    public void setEvenmorefishEnabled(final boolean evenmorefishEnabled) {
+        this.evenmorefishEnabled = evenmorefishEnabled;
+    }
+
     public boolean isFishmongerEnabled() {
         return fishmongerEnabled;
     }
@@ -135,6 +148,14 @@ public class ConfigSettings {
 
     public void setGeneralBlockExplode(final boolean generalBlockExplode) {
         this.generalBlockExplode = generalBlockExplode;
+    }
+
+    public boolean isMcpetsEnabled() {
+        return mcpetsEnabled;
+    }
+
+    public void setMcpetsEnabled(final boolean mcpetsEnabled) {
+        this.mcpetsEnabled = mcpetsEnabled;
     }
 
     public boolean isMerchantEnabled() {
@@ -201,23 +222,6 @@ public class ConfigSettings {
         this.multiverseResetPurgeDynmap = multiverseResetPurgeDynmap;
     }
 
-    public boolean isVotsEnabled() {
-        return votsEnabled;
-    }
-
-    public void setVotsEnabled(final boolean votsEnabled) {
-        this.votsEnabled = votsEnabled;
-    }
-
-    public Collection<String> getVotsShips() {
-        return votsShips;
-    }
-
-    public void setVotsShips(Collection<String> votsShips) {
-        this.votsShips.clear();
-        this.votsShips.addAll(votsShips);
-    }
-
     public boolean isPhatLootEnabled() {
         return phatLootEnabled;
     }
@@ -242,6 +246,47 @@ public class ConfigSettings {
         this.phatLootNameChest = phatLootNameChest;
     }
 
+    public boolean isTamerEnabled() {
+        return tamerEnabled;
+    }
+
+    public void setTamerEnabled(final boolean tamerEnabled) {
+        this.tamerEnabled = tamerEnabled;
+    }
+
+    public String getTamerName() {
+        return tamerName;
+    }
+
+    public void setTamerName(final String tamerName) {
+        this.tamerName = tamerName;
+    }
+
+    public String getTamerMaterial() {
+        return tamerMaterial;
+    }
+
+    public void setTamerMaterial(final String tamerMaterial) {
+        this.tamerMaterial = tamerMaterial;
+    }
+
+    public boolean isVotsEnabled() {
+        return votsEnabled;
+    }
+
+    public void setVotsEnabled(final boolean votsEnabled) {
+        this.votsEnabled = votsEnabled;
+    }
+
+    public Collection<String> getVotsShips() {
+        return votsShips;
+    }
+
+    public void setVotsShips(Collection<String> votsShips) {
+        this.votsShips.clear();
+        this.votsShips.addAll(votsShips);
+    }
+
     public Collection<String> getWorldNames() {
         return worldNames;
     }
@@ -260,11 +305,13 @@ public class ConfigSettings {
         eruptionMaterial = cfg.getString("sos.eruption.material", "MAGMA_BLOCK");
         eruptionStartHeight = cfg.getInt("sos.eruption.start-height", 30);
         eruptionCancelDrop = cfg.getBoolean("sos.eruption.cancel-drop", true);
+        evenmorefishEnabled = cfg.getBoolean("sos.evenmorefish.enabled", true);
         fishmongerEnabled = cfg.getBoolean("sos.fishmongers.enabled", true);
         fishmongerName = cfg.getString("sos.fishmongers.name", "Fishmonger");
         fishmongerReward = cfg.getInt("sos.fishmongers.reward", 2);
         fishmongerUseVault = cfg.getBoolean("sos.fishmongers.use-vault", false);
         generalBlockExplode = cfg.getBoolean("sos.general.block-explode", false);
+        mcpetsEnabled = cfg.getBoolean("sos.mcpets.enabled", true);
         merchantEnabled = cfg.getBoolean("sos.merchants.enabled", true);
         merchantName = cfg.getString("sos.merchants.name", "Merchant");
         merchantReward = cfg.getInt("sos.merchants.reward", 10);
@@ -273,11 +320,14 @@ public class ConfigSettings {
         multiverseResetUseBossbar = cfg.getBoolean("sos.multiverse-reset.use-bossbar", true);
         multiverseResetRegenHours = cfg.getDouble("sos.multiverse-reset.regen-hours", 720.0);
         multiverseResetPurgeDynmap = cfg.getBoolean("sos.multiverse-reset.purge-dynmap", true);
-        votsEnabled = cfg.getBoolean("sos.vots.enabled", true);
-        setVotsShips(cfg.getStringList("sos.vots.ships"));
         phatLootEnabled = cfg.getBoolean("sos.phatloot.enabled", true);
         phatLootNameBarrel = cfg.getString("sos.phatloot.name-barrel", "SampleLoot");
         phatLootNameChest = cfg.getString("sos.phatloot.name-chest", "SampleLoot");
+        tamerEnabled = cfg.getBoolean("sos.tamers.enabled", true);
+        tamerName = cfg.getString("sos.tamers.name", "Tamer");
+        tamerMaterial = cfg.getString("sos.tamers.material", "DIAMOND");
+        votsEnabled = cfg.getBoolean("sos.vots.enabled", true);
+        setVotsShips(cfg.getStringList("sos.vots.ships"));
         setWorldNames(cfg.getStringList("sos.worlds"));
         if (worldNames.contains("world") || worldNames.contains("world_nether") || worldNames.contains("world_the_end")) {
             if (plugin.getFoliaLib() == null || !plugin.getFoliaLib().isFolia()) {

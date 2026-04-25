@@ -55,7 +55,7 @@ public class KingBlaze implements PirateBoss {
             if (bosses.canKingBlazeUseBossBar()) {
                 final BossBar bar = plugin.getServer().createBossBar(bossName, BarColor.RED, BarStyle.SOLID);
                 bar.setProgress(1.0);
-                for (final Entity nearby : boss.getNearbyEntities(50, 25, 50)) {
+                for (final Entity nearby : le.getNearbyEntities(50, 25, 50)) {
                     if (nearby instanceof Player) {
                         bar.addPlayer((Player) nearby);
                     }

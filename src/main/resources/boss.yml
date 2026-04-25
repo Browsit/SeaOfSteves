@@ -21,3 +21,11 @@ sos:
       respawn: 20000
       scale: 1.2
       mythic: "NAME_OF_MOB_TO_USE_INSTEAD"
+    enemy-ship:
+      enabled: true
+      biome: WARM_OCEAN
+      name: "Pirate"
+      drop: IRON_INGOT
+      health: 20.0
+      scale: 1.0
+      mythic: "NAME_OF_MOB_TO_USE_INSTEAD"

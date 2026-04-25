@@ -8,6 +8,8 @@ sos:
     material: MAGMA_BLOCK
     start-height: 30
     cancel-drop: true
+  evenmorefish:
+    enabled: true
   fishmongers:
     enabled: true
     name: "Fishmonger"
@@ -15,6 +17,8 @@ sos:
     use-vault: false
   general:
     block-explode: false
+  mcpets:
+    enabled: false
   merchants:
     enabled: true
     name: "Merchant"
@@ -29,6 +33,10 @@ sos:
     enabled: true
     name-barrel: "SampleLoot"
     name-chest: "SampleLoot"
+  tamers:
+    enabled: true
+    name: "Tamer"
+    material: DIAMOND
   vots:
     enabled: true
     ships:

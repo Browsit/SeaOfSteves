@@ -116,7 +116,6 @@ public class SosExecutor implements CommandExecutor, TabExecutor {
                 new Tephra(plugin, ((Player)sender).getLocation());
                 return true;
             }
-            // TODO link with MCPets to spend points on spawning and/or unlocking pet
             if (args[0].equals("top")) {
                 if (!sender.hasPermission("seaofsteves.sos.top")) {
                     sender.sendMessage(ChatColor.RED + IO.getLang("noPermission"));
@@ -142,7 +141,21 @@ public class SosExecutor implements CommandExecutor, TabExecutor {
     public @Nullable List<String> onTabComplete(@NotNull final CommandSender sender, @NotNull final Command command,
                                                 @NotNull final String label, final @NotNull String[] args) {
         if (command.getName().equalsIgnoreCase("sos")) {
-
+            final List<String> completions = new ArrayList<>();
+            if (args.length == 1) {
+                completions.add("reload");
+                completions.add("spawn");
+                completions.add("tephra");
+                completions.add("top");
+                return completions;
+            } else if (args.length == 2 && args[0].trim().equalsIgnoreCase("spawn")) {
+                if (sender.hasPermission("seaofsteves.sos.spawn")) {
+                    completions.add("KingBlaze");
+                    completions.add("Shark");
+                    completions.add("EnemyShip");
+                }
+                return completions;
+            }
         }
         return new ArrayList<>();
     }

@@ -13,6 +13,7 @@ package org.browsit.seaofsteves.listener;
 import com.codisimus.plugins.phatloots.PhatLoot;
 import com.codisimus.plugins.phatloots.PhatLootChest;
 import com.codisimus.plugins.phatloots.PhatLoots;
+import com.oheers.fish.gui.guis.MainMenuGui;
 import com.tcoded.folialib.FoliaLib;
 import net.md_5.bungee.api.ChatMessageType;
 import org.browsit.seaofsteves.SeaOfSteves;
@@ -219,9 +220,11 @@ public class PlayerListener implements Listener {
                 }
             }
         } else {
-            if (!config.isVotsEnabled() || isInOrOnVotsShipAtSea(player, biome)) {
-                if (random.nextInt(chance.getOceanSpawnEnemyShip()) == 1) {
-                    new EnemyShip(plugin, player);
+            if (biome.name().equalsIgnoreCase(bosses.getEnemyShipBiome())) {
+                if (!config.isVotsEnabled() || isInOrOnVotsShipAtSea(player, biome)) {
+                    if (random.nextInt(chance.getOceanSpawnEnemyShip()) == 1) {
+                        new EnemyShip(plugin, player);
+                    }
                 }
             }
             if (lastEnteredOcean.containsKey(player.getUniqueId())) {
@@ -406,15 +409,24 @@ public class PlayerListener implements Listener {
         }
         if (event.getRightClicked().getType() == EntityType.VILLAGER) {
             final Villager villager = (Villager) event.getRightClicked();
-            if (villager.getProfession().equals(Villager.Profession.FISHERMAN) ||
-                    villager.getProfession().equals(Villager.Profession.CARTOGRAPHER)) {
+            if (villager.getProfession().equals(Villager.Profession.FISHERMAN)) {
                 if (config.isFishmongerEnabled()) {
                     event.setCancelled(true);
-                    // TODO integrate properly and config node
-                    if (depends.getEvenMoreFish() != null) {
-                        player.performCommand("emf gui");
+                    if (config.isEvenmorefishEnabled() && depends.getEvenMoreFish() != null) {
+                        new MainMenuGui(player).open();
                     } else {
                         PlayerUtil.sellFish(player, villager);
+                    }
+                }
+            } else if (villager.getProfession().equals(Villager.Profession.CARTOGRAPHER)) {
+                if (config.isTamerEnabled()) {
+                    event.setCancelled(true);
+                    if (config.isMcpetsEnabled()) {
+                        if (!player.performCommand("pets")) { // MCPets does not have Maven repo :(
+                            plugin.getLogger().warning("MCPets integration enabled, but command failed (check MCPets)");
+                        }
+                    } else {
+                        PlayerUtil.buyDog(player, villager);
                     }
                 }
             } else {
@@ -648,6 +660,12 @@ public class PlayerListener implements Listener {
         PlayerUtil.adios(event.getPlayer());
     }
 
+    /**
+     * Attempts to check whether player is effectively within range of a Voyage Of The Seas ship
+     * @param player to check
+     * @param biome containing ship
+     * @return true if reasonably sure that ship is near
+     */
     private boolean isInOrOnVotsShipAtSea(final Player player, final Biome biome) {
         if (WorldUtil.isOceanBiome(biome)) {
             for (final Entity e : player.getNearbyEntities(4, 4, 4)) {
@@ -669,7 +687,7 @@ public class PlayerListener implements Listener {
      * @return true if reasonably sure that toes are wet
      */
     private boolean isLikelyInWater(final Player player) {
-        // Player#isInWater can be true in high speed Catamaran
+        // NOTE: Player#isInWater can be true in high speed Catamaran
         // TODO find more efficient way to check
         for (final Entity nearby : player.getNearbyEntities(4, 4, 4)) {
             if (nearby instanceof Zombie && nearby.getName().contains("Catamaran")) {
@@ -697,6 +715,12 @@ public class PlayerListener implements Listener {
                 && player.getLocation().add(0, -1, 0).getBlock().getType().equals(Material.WATER);
     }
 
+    /**
+     * Attempts to check location for buried treasure if block below is Sand
+     *
+     * @param location to check
+     * @param player to notify
+     */
     private void runDetector(final Location location, final Player player) {
         final World world = location.getWorld();
         if (world == null) {

@@ -21,17 +21,20 @@ import io.lumine.mythic.bukkit.adapters.BukkitEntity;
 import io.lumine.mythic.bukkit.events.MythicMobDeathEvent;
 import io.lumine.mythic.bukkit.events.MythicMobDespawnEvent;
 import io.lumine.mythic.bukkit.events.MythicMobSpawnEvent;
+import io.lumine.mythic.bukkit.events.MythicPostReloadedEvent;
 import io.lumine.mythic.core.skills.SkillMetadataImpl;
 import io.lumine.mythic.core.skills.SkillTriggers;
 import net.md_5.bungee.api.ChatMessageType;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.depend.Dependencies;
 import org.browsit.seaofsteves.gear.type.PirateEmpty;
+import org.browsit.seaofsteves.gear.type.boat.PirateFireball;
 import org.browsit.seaofsteves.settings.ConfigSettings;
 import org.browsit.seaofsteves.settings.GearSettings;
 import org.browsit.seaofsteves.util.EntityUtil;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.ItemUtil;
+import org.browsit.seaofsteves.util.MythicUtil;
 import org.browsit.seaofsteves.util.NBTAPI;
 import org.browsit.seaofsteves.util.WorldUtil;
 import org.bukkit.Bukkit;
@@ -136,6 +139,7 @@ public class MythicListener implements Listener {
             event.setCancelled(true);
         } else {
             final Player player = (Player) event.getPassenger();
+            player.setGlowing(false); // If player ran '/sos scuttle'
 
             // Remove auto-generated controllers
             foliaLib.getScheduler().runAtEntityLater(player, () -> {
@@ -199,6 +203,22 @@ public class MythicListener implements Listener {
                 }
             }
             ItemUtil.renewGear(player, false);
+            plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
+                final int slot = gear.getFireballSlot();
+                if (name.equalsIgnoreCase("Catamaran")) {
+                    player.getInventory().setItem(slot, PirateFireball.get(player));
+                } else {
+                    if (plugin.getDependencies().getMythicMobs() != null) {
+                        final String ball = plugin.getGearSettings().getNavalSlotsMythic().get(slot).get(0);
+                        final ItemStack mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack(ball);
+                        if (mythic == null) {
+                            plugin.getLogger().severe("Unknown mythic gear " + ball
+                                    + ", using default gear for naval slot " + slot);
+                        }
+                        player.getInventory().setItem(slot, mythic);
+                    }
+                }
+            }, 2L);
         }
     }
 
@@ -264,6 +284,11 @@ public class MythicListener implements Listener {
         rip(event.getEntity());
     }
 
+    @EventHandler
+    public void onMythicReloaded(final MythicPostReloadedEvent event) {
+        MythicUtil.overwriteSkillsLater();
+    }
+
     public void rip(final Entity boat) {
         if (NBTAPI.hasNBT(boat, "sos_owner")) {
             final String owner = NBTAPI.getNBT(boat, "sos_owner");
@@ -275,10 +300,11 @@ public class MythicListener implements Listener {
                 return;
             }
             IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.RED + IO.getLang("bonVoyage"));
-            // Renew after dismount in case of ship death via MM command
-            plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
-                ItemUtil.renewGear(player, true);
-            }, 2L);
+            if (!plugin.getPirate(player.getUniqueId()).isScuttling()) {
+                plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
+                    ItemUtil.renewGear(player, true);
+                }, 2L);
+            }
         }
     }
 }

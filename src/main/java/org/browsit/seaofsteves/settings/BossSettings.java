@@ -42,7 +42,7 @@ public class BossSettings {
     private double enemyShipScale;
     private String enemyShipMythic;
 
-    public BossSettings(SeaOfSteves plugin) {
+    public BossSettings(final SeaOfSteves plugin) {
         this.plugin = plugin;
     }
 

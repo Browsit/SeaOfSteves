@@ -211,7 +211,8 @@ public class ItemUtil {
             final ItemStack mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack(item);
             // Set position
             if (mythic == null) {
-                plugin.getLogger().severe("Unknown mythic gear " + item + ", using default gear for this slot");
+                plugin.getLogger().severe("Unknown naval gear " + item + ", using default gear for slot "
+                        + slot);
                 continue;
             }
             player.getInventory().setItem(slot, mythic);
@@ -235,7 +236,6 @@ public class ItemUtil {
                 && one.getItemMeta().getCustomModelData() == two.getItemMeta().getCustomModelData();
     }
 
-    @SuppressWarnings("deprecation")
     public static boolean isOnCooldown(final Player player, final Material material) {
         if (lastUsedItem.containsKey(player.getUniqueId())) {
             IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.DARK_RED + IO.getLang("interactTooFast"));

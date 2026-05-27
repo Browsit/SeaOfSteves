@@ -14,6 +14,7 @@ import com.codisimus.plugins.phatloots.PhatLoots;
 import com.dfsek.terra.bukkit.TerraBukkitPlugin;
 import com.oheers.fish.api.plugin.EMFPlugin;
 import com.onarandombox.MultiverseCore.MultiverseCore;
+import com.ticxo.modelengine.api.ModelEngineAPI;
 import io.lumine.mythic.api.skills.Skill;
 import io.lumine.mythic.bukkit.MythicBukkit;
 import io.lumine.mythiccrucible.MythicCrucible;
@@ -34,6 +35,7 @@ public class Dependencies {
     private static Permission permission = null;
     private static PhatLoots phatLoots = null;
     private static PlaceholderAPIPlugin placeholderApi = null;
+    private static ModelEngineAPI modelEngine = null;
     private static MythicBukkit mythicMobs = null;
     private static MythicCrucible mythicCrucible = null;
     private static TerraBukkitPlugin terra = null;

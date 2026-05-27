@@ -18,6 +18,7 @@ import java.util.UUID;
 
 public class Pirate implements Comparable<Pirate> {
     private final UUID uniqueId;
+    private boolean isScuttling = false;
     private int goldEarned;
     private int fishCaught;
     private int enemiesPlundered;
@@ -41,6 +42,14 @@ public class Pirate implements Comparable<Pirate> {
 
     public String getName() {
         return getPlayer().getName();
+    }
+
+    public boolean isScuttling() {
+        return isScuttling;
+    }
+
+    public void setScuttling(final boolean isScuttling) {
+        this.isScuttling = isScuttling;
     }
 
     public int getGoldEarned() {

@@ -92,7 +92,6 @@ public class EnemyShip implements PirateBoss {
                     boat.addPassenger(zombie);
 
                     final double speed = 0.75; // Blocks per second
-                    System.out.println(boat.getWorld().getBiome(boat.getLocation()).name());
                     plugin.getFoliaLib().getScheduler().runAtEntityTimer(boat, task -> {
                         if (!boat.isValid() || zombie.isDead() || target.isDead() || boat.getPassengers().isEmpty()
                                 || boat.getLocation().getWorld() == null

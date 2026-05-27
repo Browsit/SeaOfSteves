@@ -11,7 +11,6 @@
 package org.browsit.seaofsteves;
 
 import com.tcoded.folialib.FoliaLib;
-import io.lumine.mythic.api.skills.Skill;
 import io.lumine.mythic.core.mobs.ActiveMob;
 import org.browsit.seaofsteves.command.SosExecutor;
 import org.browsit.seaofsteves.depend.Dependencies;
@@ -38,9 +37,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SeaOfSteves extends JavaPlugin {
     private Dependencies depends;
@@ -50,7 +49,7 @@ public class SeaOfSteves extends JavaPlugin {
     private GearSettings gear;
     private FoliaLib foliaLib;
     private ResetTimer timer;
-    private final Collection<Pirate> pirates = new ConcurrentSkipListSet<>();
+    private volatile Map<UUID, Pirate> pirates = new ConcurrentHashMap<>();
 
     @Override
     public void onEnable() {
@@ -91,6 +90,8 @@ public class SeaOfSteves extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EntityListener(this), this);
         if (getDependencies().isPluginAvailable("MythicMobs")) {
             getServer().getPluginManager().registerEvents(new MythicListener(this), this);
+            // Should happen in MythicReloadedEvent at startup
+            //MythicUtil.overwriteSkillsLater();
         }
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getPluginManager().registerEvents(new ProjectileListener(this), this);
@@ -101,25 +102,6 @@ public class SeaOfSteves extends JavaPlugin {
 
         timer = new ResetTimer(this);
         timer.run();
-
-        // Delay this code to run after MythicMobs fully loads
-        foliaLib.getScheduler().runLater(() -> {
-            if (depends.getMythicMobs() != null) {
-                getLogger().info("Overwriting conflicting VOTS skills, if present...");
-                final Optional<Skill> opt = getDependencies().getMythicMobs().getSkillManager().getSkill("VOTSSpawnControlers");
-                if (opt.isPresent()) {
-                    final Skill toRemove = opt.get();
-                    getDependencies().getMythicMobs().getSkillManager().getSkills().remove(toRemove);
-                    getLogger().info("Successfully disabled VOTSSpawnControlers");
-                }
-                final Optional<Skill> opt2 = getDependencies().getMythicMobs().getSkillManager().getSkill("VOTSControlers");
-                if (opt2.isPresent()) {
-                    final Skill toRemove = opt2.get();
-                    getDependencies().getMythicMobs().getSkillManager().getSkills().remove(toRemove);
-                    getLogger().info("Successfully disabled VOTSControlers");
-                }
-            }
-        }, 2L);
     }
 
     @Override
@@ -167,7 +149,7 @@ public class SeaOfSteves extends JavaPlugin {
         boss.load();
     }
 
-    public @NotNull FoliaLib getFoliaLib() {
+    public FoliaLib getFoliaLib() {
         return foliaLib;
     }
 
@@ -176,24 +158,18 @@ public class SeaOfSteves extends JavaPlugin {
     }
 
     public Collection<Pirate> getAllPirates() {
-        return pirates;
+        return pirates.values();
     }
 
-    public @NotNull Pirate getPirate(UUID uniqueId) {
-        for (Pirate pirate : getAllPirates()) {
-            if (pirate.getUniqueId().equals(uniqueId)) {
-                return pirate;
-            }
-        }
-        addPirate(new Pirate(uniqueId));
-        return getPirate(uniqueId);
+    public @NotNull Pirate getPirate(final UUID uniqueId) {
+        return pirates.computeIfAbsent(uniqueId, uuid -> new Pirate(uniqueId));
     }
 
-    public void addPirate(Pirate pirate) {
-        pirates.add(pirate);
+    public void addPirate(final Pirate pirate) {
+        pirates.put(pirate.getUniqueId(), pirate);
     }
 
-    public void removePirate(Pirate pirate) {
-        pirates.remove(pirate);
+    public void removePirate(final Pirate pirate) {
+        pirates.remove(pirate.getUniqueId());
     }
 }

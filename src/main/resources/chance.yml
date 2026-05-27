@@ -2,7 +2,7 @@
 sos:
   ocean:
     spawn-drowned: 65
-    spawn-enemy-ship: 1000
+    spawn-enemy-ship: 1500
   island:
     spawn-skeleton-with-bow: 10
     spawn-captain: 5

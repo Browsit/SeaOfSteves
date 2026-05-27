@@ -19,21 +19,25 @@ import org.browsit.seaofsteves.api.event.PirateSellTreasureEvent;
 import org.browsit.seaofsteves.player.Pirate;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Wolf;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 public class PlayerUtil {
     public static SeaOfSteves plugin = (SeaOfSteves) Bukkit.getPluginManager().getPlugin("SeaOfSteves");
     private static FoliaLib foliaLib;
 
     public static void adios(final Player player) {
+        player.setGlowing(false);
         if (plugin.getConfigSettings().isVotsEnabled() && plugin.getDependencies().getMythicMobs() != null) {
             for (final Entity e : player.getNearbyEntities(250, 50, 250)) {
                 if (NBTAPI.hasNBT(e, "sos_owner")) {
@@ -134,7 +138,6 @@ public class PlayerUtil {
         }
     }
 
-    // TODO - impose limit on dogs
     public static void buyDog(final Player player, final Entity tamer) {
         final Material material = Material.matchMaterial(plugin.getConfigSettings().getTamerMaterial());
         if (material == null) {
@@ -156,7 +159,36 @@ public class PlayerUtil {
             }
         }
         if (found) {
-            final Wolf wolf = (Wolf) tamer.getWorld().spawnEntity(tamer.getLocation(), EntityType.WOLF);
+            int count = 0;
+            int max = plugin.getConfigSettings().getTamerBuyLimit();
+            if (max < 1) {
+                IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.RED + IO.getLang("interactTamerMaximum"));
+                return;
+            }
+            for (final LivingEntity entity : player.getWorld().getLivingEntities()) {
+                if (entity instanceof Wolf) {
+                    final Wolf check = (Wolf) entity;
+                    if (check.getOwner() != null && check.getOwner().getUniqueId().equals(player.getUniqueId())) {
+                        count++;
+                        final Location loc = check.getLocation();
+                        if (loc.getWorld() == null) {
+                            plugin.getLogger().warning(player.getName() + " has wolf in invalid world!");
+                        }
+                        plugin.getLogger().info(player.getName() + " has wolf at [" + loc.getWorld().getName() + "]"
+                                + loc.getX() + ", " + loc.getY() + ", " + loc.getZ());
+                    }
+                    if (count >= max) {
+                        IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.RED + IO.getLang("interactTamerMaximum"));
+                        return;
+                    }
+                }
+            }
+            final Location loc = tamer.getLocation();
+            if (loc.getWorld() == null) {
+                plugin.getLogger().warning(player.getName() + " found Tamer in invalid world!");
+                return;
+            }
+            final Wolf wolf = (Wolf) tamer.getWorld().spawnEntity(loc, EntityType.WOLF);
             wolf.setOwner(player);
             wolf.setCustomName(player.getName() + "'s Dog");
             wolf.setCustomNameVisible(true);
@@ -165,11 +197,24 @@ public class PlayerUtil {
             final PirateAcquirePetEvent pEvent = new PirateAcquirePetEvent(
                     plugin.getPirate(player.getUniqueId()), tamer, cost);
             plugin.getServer().getPluginManager().callEvent(pEvent);
-            plugin.getLogger().info(player.getName() + " bought dog from " + plugin.getConfigSettings().getTamerName() + " for "
-                    + cost.getType().name());
+            plugin.getLogger().info(player.getName() + " bought dog from " + plugin.getConfigSettings().getTamerName()
+                    + " for " + cost.getType().name() + " at [" + loc.getWorld().getName() + "]"
+                    + loc.getX() + ", " + loc.getY() + ", " + loc.getZ());
         } else {
             IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.YELLOW + IO.getLang("interactTamerFailed")
                     .replace("<material>", cost.getType().name()));
         }
+    }
+
+    public static String formatTime(long millis) {
+        long days = TimeUnit.MILLISECONDS.toDays(millis);
+        millis -= TimeUnit.DAYS.toMillis(days);
+        long hours = TimeUnit.MILLISECONDS.toHours(millis);
+        millis -= TimeUnit.HOURS.toMillis(hours);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
+        millis -= TimeUnit.MINUTES.toMillis(minutes);
+        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
+
+        return String.format("%dd %dh %dm %ds", days, hours, minutes, seconds);
     }
 }

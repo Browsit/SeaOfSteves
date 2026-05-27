@@ -1,6 +1,6 @@
 name: SeaOfSteves
-version: 0.0.8
-description: Pirate gameplay plugin for Minecraft servers.
+version: 0.0.9
+description: Boat battle plugin for Minecraft servers.
 folia-supported: true
 api-version: 1.20.5
 author: Browsit
@@ -20,6 +20,9 @@ permissions:
   seaofsteves.sos.reload:
     description: Reload plugin data
     default: op
+  seaofsteves.sos.scuttle:
+    description: Remove active boat
+    default: true
   seaofsteves.sos.spawn:
     description: Spawn boss if enabled
     default: op

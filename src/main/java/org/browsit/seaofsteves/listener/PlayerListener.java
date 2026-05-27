@@ -15,6 +15,8 @@ import com.codisimus.plugins.phatloots.PhatLootChest;
 import com.codisimus.plugins.phatloots.PhatLoots;
 import com.oheers.fish.gui.guis.MainMenuGui;
 import com.tcoded.folialib.FoliaLib;
+import com.ticxo.modelengine.api.ModelEngineAPI;
+import com.ticxo.modelengine.api.model.ActiveModel;
 import net.md_5.bungee.api.ChatMessageType;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.api.event.PirateFishCaughtEvent;
@@ -221,7 +223,7 @@ public class PlayerListener implements Listener {
             }
         } else {
             if (biome.name().equalsIgnoreCase(bosses.getEnemyShipBiome())) {
-                if (!config.isVotsEnabled() || isInOrOnVotsShipAtSea(player, biome)) {
+                if (!config.isVotsEnabled() || isNearVotsShipAtSea(player, biome)) {
                     if (random.nextInt(chance.getOceanSpawnEnemyShip()) == 1) {
                         new EnemyShip(plugin, player);
                     }
@@ -235,7 +237,7 @@ public class PlayerListener implements Listener {
                     }
                 }
             }
-            // On dry land
+            // Player is now assumed to be on dry land
             lastEnteredOcean.remove(player.getUniqueId());
             if (bosses.isKingBlazeEnabled()) {
                 final com.dfsek.terra.api.world.biome.Biome terraBiome = TerraUtil.getTerraBiome(event.getTo());
@@ -256,7 +258,7 @@ public class PlayerListener implements Listener {
                         }
                     }
                     boolean hasBossNearby = false; // TODO global inBossFight var
-                    if (terraBiomeID.equals("VOLCANO_BASE_EDGE") /*|| terraBiomeID.startsWith(bossBiome)*/) {
+                    if (terraBiomeID.equals("VOLCANO_BASE_EDGE")) {
                         if (!lastEnteredVolcano.containsKey(player.getUniqueId())) {
                             lastEnteredVolcano.put(player.getUniqueId(), System.currentTimeMillis());
                             IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.YELLOW + IO.getLang("moveBossApproach"));
@@ -366,10 +368,10 @@ public class PlayerListener implements Listener {
             }
             return;
         }
-        // TODO - use file for respawn timer?
+        // TODO - Use storage for respawn timer (persistence)
         final Player player = entity.getKiller();
         IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.GREEN + IO.getLang("bossDefeated").replace("<time>",
-                plugin.getResetTimer().formatTime(plugin.getBossSettings().getKingBlazeRespawn())
+                PlayerUtil.formatTime(plugin.getBossSettings().getKingBlazeRespawn())
                         .replace("0d ", "").replace("0h ", "").replace("0m ", "")));
         lastKilledBoss.put(player.getUniqueId(), System.currentTimeMillis());
         if (!bosses.getKingBlazeMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) { // Use mythic Drops instead
@@ -459,6 +461,12 @@ public class PlayerListener implements Listener {
                     final int slot = player.getInventory().getHeldItemSlot();
                     final ItemStack replace = depends.getMythicMobs().getItemManager().getItemStack(mythic);
                     foliaLib.getScheduler().runAtEntityLater(player, () -> player.getInventory().setItem(slot, replace), 2L);
+                    plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
+                        player.getInventory().setItem(slot, replace);
+                        if (mythic.startsWith("VOTSShipRepair")) {
+                            player.setCooldown(replace.getType(), 120);
+                        }
+                    }, 2L);
                     return;
                 }
             }
@@ -468,7 +476,7 @@ public class PlayerListener implements Listener {
             }
             final Block clickedBlock = event.getClickedBlock();
             boolean isInDingy = player.getVehicle() != null && player.getVehicle() instanceof Boat;
-            boolean isInOrOnVotsShip = isInOrOnVotsShipAtSea(player, biome);
+            boolean isInVotsShip = isInVotsShipAtSea(player, biome);
             if (clickedBlock != null && (clickedBlock.getType().equals(Material.CHEST)
                     || clickedBlock.getType().equals(Material.TRAPPED_CHEST)
                     || clickedBlock.getType().equals(Material.BARREL))) {
@@ -509,7 +517,7 @@ public class PlayerListener implements Listener {
             } else  {
                 if (gear.isFireballEnabled() && PirateFireball.equals(hand)) {
                     event.setCancelled(true);
-                    if (isInDingy || isInOrOnVotsShip) {
+                    if (isInDingy || isInVotsShip) {
                         if (ItemUtil.isOnCooldown(player, event.getMaterial())) {
                             return;
                         }
@@ -521,7 +529,7 @@ public class PlayerListener implements Listener {
                     }
                 } else if (gear.isSurveyorEnabled() && PirateSurveyor.equals(hand)) {
                     event.setCancelled(true);
-                    if (isInDingy || isInOrOnVotsShip) {
+                    if (isInDingy || isInVotsShip) {
                         if (ItemUtil.isOnCooldown(player, event.getMaterial())) {
                             return;
                         }
@@ -553,7 +561,6 @@ public class PlayerListener implements Listener {
                 IO.sendMessage(player, ChatMessageType.CHAT, IO.getLang("interactSurveyNearest").replace("<amount>", String.valueOf(distance)));
                 plugin.getLogger().info(result.toString());
             }*/
-
             if (PirateDingy.equals(hand)) {
                 if (config.isVotsEnabled() && depends.isVotsPresent()) {
                     final String use = NBTAPI.getNBT(hand, "sos_type");
@@ -567,6 +574,20 @@ public class PlayerListener implements Listener {
                     NBTAPI.addNBT(hand, "sos_type", ship);
                     IO.sendMessage(player, ChatMessageType.ACTION_BAR,
                             ChatColor.GREEN + IO.getLang("changeShipType").replace("<type>", ChatColor.YELLOW + ship));
+                    final int slot = gear.getFireballSlot();
+                    if (ship.equals("Catamaran")) {
+                        player.getInventory().setItem(slot, PirateFireball.get(player));
+                    } else {
+                        if (plugin.getDependencies().getMythicMobs() != null) {
+                            final String ball = plugin.getGearSettings().getNavalSlotsMythic().get(slot).get(0);
+                            final ItemStack mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack(ball);
+                            if (mythic == null) {
+                                plugin.getLogger().severe("Unknown mythic gear " + ball
+                                        + ", using default gear for naval slot " + slot);
+                            }
+                            player.getInventory().setItem(slot, mythic);
+                        }
+                    }
                 } else {
                     final int i = BOAT_TYPE.indexOf(hand.getType().name());
                     final String ship;
@@ -631,6 +652,7 @@ public class PlayerListener implements Listener {
         }
         event.getDrops().removeIf(ItemUtil::isGear);
         final Player player = event.getEntity();
+        player.setGlowing(false);
         lastEnteredOcean.remove(event.getEntity().getUniqueId());
         for (Entity e : event.getEntity().getNearbyEntities(35, 20, 35)) {
             if (e instanceof Dolphin) {
@@ -661,12 +683,38 @@ public class PlayerListener implements Listener {
     }
 
     /**
+     * Checks whether player is seated inside a Voyage Of The Seas ship
+     * @param player to check
+     * @param biome containing ship
+     * @return true if seated in ship
+     */
+    private boolean isInVotsShipAtSea(final Player player, final Biome biome) {
+        if (!depends.isPluginAvailable("ModelEngine")) {
+            plugin.getLogger().severe("ModelEngine not available");
+            return false;
+        }
+        if (WorldUtil.isOceanBiome(biome)) {
+            final ActiveModel modeledEntity = ModelEngineAPI.getMountPairManager().getMountedPair(player.getUniqueId());
+            if (modeledEntity != null) {
+                for (final String str : modeledEntity.getModeledEntity().getModels().keySet()) {
+                    String name = str.toLowerCase().replace("elitecreatures", "");
+                    name = name.substring(0, 1).toUpperCase() + name.substring(1);
+                    if (VOTS_TYPE.contains(name)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Attempts to check whether player is effectively within range of a Voyage Of The Seas ship
      * @param player to check
      * @param biome containing ship
      * @return true if reasonably sure that ship is near
      */
-    private boolean isInOrOnVotsShipAtSea(final Player player, final Biome biome) {
+    private boolean isNearVotsShipAtSea(final Player player, final Biome biome) {
         if (WorldUtil.isOceanBiome(biome)) {
             for (final Entity e : player.getNearbyEntities(4, 4, 4)) {
                 if (e instanceof Zombie) {
@@ -687,8 +735,7 @@ public class PlayerListener implements Listener {
      * @return true if reasonably sure that toes are wet
      */
     private boolean isLikelyInWater(final Player player) {
-        // NOTE: Player#isInWater can be true in high speed Catamaran
-        // TODO find more efficient way to check
+        // Check for player in VOTS Catamaran (NOTE: first because Player#isInWater can be true at high speeds)
         for (final Entity nearby : player.getNearbyEntities(4, 4, 4)) {
             if (nearby instanceof Zombie && nearby.getName().contains("Catamaran")) {
                 if (player.getLocation().add(0, -2, 0).getBlock().isLiquid()) {

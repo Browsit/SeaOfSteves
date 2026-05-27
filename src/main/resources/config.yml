@@ -17,6 +17,7 @@ sos:
     use-vault: false
   general:
     block-explode: false
+    cooldown-scuttle: 30
   mcpets:
     enabled: false
   merchants:
@@ -37,6 +38,7 @@ sos:
     enabled: true
     name: "Tamer"
     material: DIAMOND
+    buy-limit: 2
   vots:
     enabled: true
     ships:

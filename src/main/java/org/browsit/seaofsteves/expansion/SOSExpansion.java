@@ -13,6 +13,7 @@ package org.browsit.seaofsteves.expansion;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.player.Pirate;
+import org.browsit.seaofsteves.util.PlayerUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +61,7 @@ public class SOSExpansion extends PlaceholderExpansion {
 
             final String worldName = params.substring(params.lastIndexOf("_") + 1);
             if (Bukkit.getWorld(worldName) != null) {
-                return plugin.getResetTimer().formatTime(plugin.getResetTimer().getTimerRemaining(worldName));
+                return PlayerUtil.formatTime(plugin.getResetTimer().getTimerRemaining(worldName));
             }
         } else if (params.startsWith("gold_rank_")) {
             if (!plugin.getConfig().getBoolean("sos.merchants.enabled")) {

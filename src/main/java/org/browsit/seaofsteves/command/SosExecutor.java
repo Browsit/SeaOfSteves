@@ -10,20 +10,25 @@
 
 package org.browsit.seaofsteves.command;
 
+import io.lumine.mythic.core.mobs.ActiveMob;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.boss.type.EnemyShip;
 import org.browsit.seaofsteves.boss.type.KingBlaze;
 import org.browsit.seaofsteves.boss.type.Shark;
 import org.browsit.seaofsteves.boss.type.lavablock.Tephra;
+import org.browsit.seaofsteves.gear.type.PirateEmpty;
 import org.browsit.seaofsteves.player.Pirate;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.ItemUtil;
+import org.browsit.seaofsteves.util.NBTAPI;
+import org.browsit.seaofsteves.util.PlayerUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +38,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class SosExecutor implements CommandExecutor, TabExecutor {
@@ -66,6 +72,63 @@ public class SosExecutor implements CommandExecutor, TabExecutor {
                 sender.sendMessage(ChatColor.GREEN + IO.getLang("commandReloadDone")
                         .replace("<worlds>", ChatColor.RESET + worlds));
                 return true;
+            }
+            if (args[0].equals("scuttle")) {
+                if (!sender.hasPermission("seaofsteves.sos.scuttle")) {
+                    sender.sendMessage(ChatColor.RED + IO.getLang("noPermission"));
+                    return false;
+                }
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage(ChatColor.RED + IO.getLang("consoleError"));
+                    return false;
+                }
+                final Player player = (Player)sender;
+                final Pirate pirate = plugin.getPirate(player.getUniqueId());
+                if (pirate.isScuttling()) {
+                    sender.sendMessage(ChatColor.RED + IO.getLang("commandFailed"));
+                    return false;
+                }
+                boolean success = false;
+                if (plugin.getConfigSettings().isVotsEnabled()) {
+                    for (final ActiveMob mob : plugin.getDependencies().getMythicMobs().getMobManager().getActiveMobs()) {
+                        if (mob.getOwner().isPresent() && mob.getOwner().get() != null) {
+                            final UUID uuid = mob.getOwner().get().getUniqueId();
+                            if (uuid != null && uuid.equals(player.getUniqueId())) {
+                                plugin.getLogger().info("Scuttling a VOTS entity with UUID " + mob.getUniqueId());
+                                mob.despawn();
+                                success = true;
+                            }
+                        }
+                    }
+                } else {
+                    for (final Entity le : player.getWorld().getEntities()) {
+                        if (NBTAPI.hasNBT(le, "sos_owner")) {
+                            final String owner = NBTAPI.getNBT(le, "sos_owner");
+                            if (owner != null && UUID.fromString(owner).equals(player.getUniqueId())) {
+                                plugin.getLogger().info("Scuttling an entity with UUID " + le.getUniqueId());
+                                le.remove();
+                                success = true;
+                            }
+                        }
+                    }
+                }
+                if (success) {
+                    final int seconds = plugin.getConfigSettings().getGeneralCooldownScuttle();
+                    sender.sendMessage(ChatColor.YELLOW + IO.getLang("destroyShipSuccess")
+                            .replace("<time>", PlayerUtil.formatTime(seconds * 1000L)));
+                    player.setGlowing(true);
+                    pirate.setScuttling(true);
+                    plugin.addPirate(pirate);
+                    player.setCooldown(PirateEmpty.get(player).getType(), seconds * 20);
+                    plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
+                        player.setGlowing(false);
+                        pirate.setScuttling(false);
+                        plugin.addPirate(pirate);
+                        ItemUtil.renewGear(player, true);
+                    }, seconds * 20L);
+                } else {
+                    sender.sendMessage(ChatColor.RED + IO.getLang("commandFailed"));
+                }
             }
             if (args[0].equalsIgnoreCase("spawn")) {
                 if (!sender.hasPermission("seaofsteves.sos.spawn")) {
@@ -144,6 +207,7 @@ public class SosExecutor implements CommandExecutor, TabExecutor {
             final List<String> completions = new ArrayList<>();
             if (args.length == 1) {
                 completions.add("reload");
+                completions.add("scuttle");
                 completions.add("spawn");
                 completions.add("tephra");
                 completions.add("top");

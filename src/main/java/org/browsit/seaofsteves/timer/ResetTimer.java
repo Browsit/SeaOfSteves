@@ -13,6 +13,7 @@ package org.browsit.seaofsteves.timer;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.settings.ConfigSettings;
 import org.browsit.seaofsteves.util.IO;
+import org.browsit.seaofsteves.util.PlayerUtil;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
 import org.bukkit.boss.BarColor;
@@ -25,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class ResetTimer {
@@ -114,7 +114,7 @@ public class ResetTimer {
             final boolean useBossBar = plugin.getConfig().getBoolean("sos.multiverse-reset.use-bossbar");
 
             if (useBossBar && bar == null) {
-                bar = plugin.getServer().createBossBar(formatTime(0L), BarColor.WHITE, BarStyle.SEGMENTED_20);
+                bar = plugin.getServer().createBossBar(PlayerUtil.formatTime(0L), BarColor.WHITE, BarStyle.SEGMENTED_20);
             }
 
             plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
@@ -179,7 +179,7 @@ public class ResetTimer {
                                     }
                                 }
                             }
-                            bar.setTitle(formatTime(remainingTime));
+                            bar.setTitle(PlayerUtil.formatTime(remainingTime));
                         } else {
                             bar.removePlayer(p);
                         }
@@ -187,17 +187,5 @@ public class ResetTimer {
                 }
             }, bufferTime, tickRepeat);
         }
-    }
-
-    public String formatTime(long millis) {
-        long days = TimeUnit.MILLISECONDS.toDays(millis);
-        millis -= TimeUnit.DAYS.toMillis(days);
-        long hours = TimeUnit.MILLISECONDS.toHours(millis);
-        millis -= TimeUnit.HOURS.toMillis(hours);
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(millis);
-        millis -= TimeUnit.MINUTES.toMillis(minutes);
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(millis);
-
-        return String.format("%dd %dh %dm %ds", days, hours, minutes, seconds);
     }
 }

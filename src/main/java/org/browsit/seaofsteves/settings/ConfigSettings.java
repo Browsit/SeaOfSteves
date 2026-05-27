@@ -31,6 +31,7 @@ public class ConfigSettings {
     private int fishmongerReward;
     private boolean fishmongerUseVault;
     private boolean generalBlockExplode;
+    private int generalCooldownScuttle;
     private boolean mcpetsEnabled;
     private boolean merchantEnabled;
     private String merchantName;
@@ -46,6 +47,7 @@ public class ConfigSettings {
     private boolean tamerEnabled;
     private String tamerName;
     private String tamerMaterial;
+    private int tamerBuyLimit;
     private boolean votsEnabled;
     private final Collection<String> votsShips = new LinkedHashSet<>();
     private final Collection<String> worldNames = new ConcurrentSkipListSet<>();
@@ -148,6 +150,14 @@ public class ConfigSettings {
 
     public void setGeneralBlockExplode(final boolean generalBlockExplode) {
         this.generalBlockExplode = generalBlockExplode;
+    }
+
+    public int getGeneralCooldownScuttle() {
+        return generalCooldownScuttle;
+    }
+
+    public void setGeneralCooldownScuttle(final int generalCooldownScuttle) {
+        this.generalCooldownScuttle = generalCooldownScuttle;
     }
 
     public boolean isMcpetsEnabled() {
@@ -270,6 +280,14 @@ public class ConfigSettings {
         this.tamerMaterial = tamerMaterial;
     }
 
+    public int getTamerBuyLimit() {
+        return tamerBuyLimit;
+    }
+
+    public void setTamerBuyLimit(final int tamerBuyLimit) {
+        this.tamerBuyLimit = tamerBuyLimit;
+    }
+
     public boolean isVotsEnabled() {
         return votsEnabled;
     }
@@ -311,6 +329,7 @@ public class ConfigSettings {
         fishmongerReward = cfg.getInt("sos.fishmongers.reward", 2);
         fishmongerUseVault = cfg.getBoolean("sos.fishmongers.use-vault", false);
         generalBlockExplode = cfg.getBoolean("sos.general.block-explode", false);
+        generalCooldownScuttle = cfg.getInt("sos.general.cooldown-scuttle", 30);
         mcpetsEnabled = cfg.getBoolean("sos.mcpets.enabled", true);
         merchantEnabled = cfg.getBoolean("sos.merchants.enabled", true);
         merchantName = cfg.getString("sos.merchants.name", "Merchant");
@@ -326,6 +345,7 @@ public class ConfigSettings {
         tamerEnabled = cfg.getBoolean("sos.tamers.enabled", true);
         tamerName = cfg.getString("sos.tamers.name", "Tamer");
         tamerMaterial = cfg.getString("sos.tamers.material", "DIAMOND");
+        tamerBuyLimit = cfg.getInt("sos.tamers.buy-limit", 2);
         votsEnabled = cfg.getBoolean("sos.vots.enabled", true);
         setVotsShips(cfg.getStringList("sos.vots.ships"));
         setWorldNames(cfg.getStringList("sos.worlds"));

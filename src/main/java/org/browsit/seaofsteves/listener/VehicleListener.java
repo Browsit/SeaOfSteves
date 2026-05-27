@@ -90,8 +90,10 @@ public class VehicleListener implements Listener {
                 IO.sendMessage((Player) event.getEntered(), ChatMessageType.CHAT,
                         ChatColor.RED + IO.getLang("enterShipFailed").replace("<name>", event.getEntered().getName()));
                 event.setCancelled(true);
+                return;
             }
         }
+        event.getEntered().setGlowing(false); // If player ran '/sos scuttle'
     }
 
     @EventHandler
@@ -106,9 +108,11 @@ public class VehicleListener implements Listener {
                 final Player player = ((Player)event.getExited());
                 foliaLib.getScheduler().runAtEntityLater(player, () -> {
                     if (!player.isInsideVehicle()) {
-                        final ItemStack dingy = PirateDingy.get(player);
-                        //dingy.setType(((Boat) event.getVehicle()).getBoatType().getMaterial());
-                        player.getInventory().setItem(gear.getDingySlot(), dingy);
+                        if (!plugin.getPirate(player.getUniqueId()).isScuttling()) {
+                            final ItemStack dingy = PirateDingy.get(player);
+                            //dingy.setType(((Boat) event.getVehicle()).getBoatType().getMaterial());
+                            player.getInventory().setItem(gear.getDingySlot(), dingy);
+                        }
                     }
                 }, 2L);
                 event.getVehicle().remove();

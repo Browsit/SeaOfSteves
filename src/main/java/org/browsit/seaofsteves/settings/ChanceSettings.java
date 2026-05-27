@@ -23,7 +23,7 @@ public class ChanceSettings {
     private int volcanoSpawnMagmaCube;
     private int volcanoSpawnTephra;
 
-    public ChanceSettings(SeaOfSteves plugin) {
+    public ChanceSettings(final SeaOfSteves plugin) {
         this.plugin = plugin;
     }
 

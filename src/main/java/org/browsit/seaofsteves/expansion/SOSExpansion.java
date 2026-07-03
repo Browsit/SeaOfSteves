@@ -61,7 +61,7 @@ public class SOSExpansion extends PlaceholderExpansion {
 
             final String worldName = params.substring(params.lastIndexOf("_") + 1);
             if (Bukkit.getWorld(worldName) != null) {
-                return PlayerUtil.formatTime(plugin.getResetTimer().getTimerRemaining(worldName));
+                return PlayerUtil.formatTime(plugin.getResetTimer().getTimerRemaining(worldName), false);
             }
         } else if (params.startsWith("gold_rank_")) {
             if (!plugin.getConfig().getBoolean("sos.merchants.enabled")) {

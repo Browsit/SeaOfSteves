@@ -10,12 +10,18 @@
 
 package org.browsit.seaofsteves.command;
 
+import io.lumine.mythic.api.skills.Skill;
+import io.lumine.mythic.api.skills.SkillCaster;
+import io.lumine.mythic.bukkit.adapters.BukkitEntity;
 import io.lumine.mythic.core.mobs.ActiveMob;
+import io.lumine.mythic.core.skills.SkillMetadataImpl;
+import io.lumine.mythic.core.skills.SkillTriggers;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.boss.type.EnemyShip;
 import org.browsit.seaofsteves.boss.type.KingBlaze;
 import org.browsit.seaofsteves.boss.type.Shark;
 import org.browsit.seaofsteves.boss.type.lavablock.Tephra;
+import org.browsit.seaofsteves.depend.Dependencies;
 import org.browsit.seaofsteves.gear.type.PirateEmpty;
 import org.browsit.seaofsteves.player.Pirate;
 import org.browsit.seaofsteves.util.IO;
@@ -23,6 +29,7 @@ import org.browsit.seaofsteves.util.ItemUtil;
 import org.browsit.seaofsteves.util.NBTAPI;
 import org.browsit.seaofsteves.util.PlayerUtil;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -38,14 +45,17 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class SosExecutor implements CommandExecutor, TabExecutor {
     private final SeaOfSteves plugin;
+    private final Dependencies depends;
 
     public SosExecutor(SeaOfSteves plugin) {
         this.plugin = plugin;
+        this.depends = plugin.getDependencies();
     }
 
     @Override
@@ -90,11 +100,18 @@ public class SosExecutor implements CommandExecutor, TabExecutor {
                 }
                 boolean success = false;
                 if (plugin.getConfigSettings().isVotsEnabled()) {
-                    for (final ActiveMob mob : plugin.getDependencies().getMythicMobs().getMobManager().getActiveMobs()) {
+                    for (final ActiveMob mob : depends.getMythicMobs().getMobManager().getActiveMobs()) {
                         if (mob.getOwner().isPresent() && mob.getOwner().get() != null) {
                             final UUID uuid = mob.getOwner().get().getUniqueId();
                             if (uuid != null && uuid.equals(player.getUniqueId())) {
                                 plugin.getLogger().info("Scuttling a VOTS entity with UUID " + mob.getUniqueId());
+                                final Optional<Skill> opt = depends.getMythicMobs().getSkillManager().getSkill("VOTSNPCGalleonShipDeathSound");
+                                if (opt.isPresent()) {
+                                    final BukkitEntity bukkitEntity = new BukkitEntity(player);
+                                    final SkillCaster c = depends.getMythicMobs().getSkillManager().getCaster(bukkitEntity);
+                                    final SkillMetadataImpl meta = new SkillMetadataImpl(SkillTriggers.API, c, bukkitEntity);
+                                    opt.get().execute(meta);
+                                }
                                 mob.despawn();
                                 success = true;
                             }
@@ -106,6 +123,7 @@ public class SosExecutor implements CommandExecutor, TabExecutor {
                             final String owner = NBTAPI.getNBT(le, "sos_owner");
                             if (owner != null && UUID.fromString(owner).equals(player.getUniqueId())) {
                                 plugin.getLogger().info("Scuttling an entity with UUID " + le.getUniqueId());
+                                player.playSound(le, Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR, 1f, 1f);
                                 le.remove();
                                 success = true;
                             }
@@ -114,17 +132,20 @@ public class SosExecutor implements CommandExecutor, TabExecutor {
                 }
                 if (success) {
                     final int seconds = plugin.getConfigSettings().getGeneralCooldownScuttle();
-                    sender.sendMessage(ChatColor.YELLOW + IO.getLang("destroyShipSuccess")
-                            .replace("<time>", PlayerUtil.formatTime(seconds * 1000L)));
                     player.setGlowing(true);
                     pirate.setScuttling(true);
                     plugin.addPirate(pirate);
+                    plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
+                        ItemUtil.renewGear(player, true);
+                        sender.sendMessage(ChatColor.YELLOW + IO.getLang("destroyShipSuccess")
+                                .replace("<time>", PlayerUtil.formatTime(seconds * 1000L, true)));
+                        sender.sendMessage(ChatColor.GRAY + IO.getLang("destroyShipWarning"));
+                    }, 2L);
                     player.setCooldown(PirateEmpty.get(player).getType(), seconds * 20);
                     plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
                         player.setGlowing(false);
                         pirate.setScuttling(false);
                         plugin.addPirate(pirate);
-                        ItemUtil.renewGear(player, true);
                     }, seconds * 20L);
                 } else {
                     sender.sendMessage(ChatColor.RED + IO.getLang("commandFailed"));

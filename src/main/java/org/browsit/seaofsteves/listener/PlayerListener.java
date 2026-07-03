@@ -61,6 +61,7 @@ import org.bukkit.entity.Fireball;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
@@ -371,8 +372,7 @@ public class PlayerListener implements Listener {
         // TODO - Use storage for respawn timer (persistence)
         final Player player = entity.getKiller();
         IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.GREEN + IO.getLang("bossDefeated").replace("<time>",
-                PlayerUtil.formatTime(plugin.getBossSettings().getKingBlazeRespawn())
-                        .replace("0d ", "").replace("0h ", "").replace("0m ", "")));
+                PlayerUtil.formatTime(plugin.getBossSettings().getKingBlazeRespawn(), true)));
         lastKilledBoss.put(player.getUniqueId(), System.currentTimeMillis());
         if (!bosses.getKingBlazeMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) { // Use mythic Drops instead
             return;
@@ -575,7 +575,7 @@ public class PlayerListener implements Listener {
                     IO.sendMessage(player, ChatMessageType.ACTION_BAR,
                             ChatColor.GREEN + IO.getLang("changeShipType").replace("<type>", ChatColor.YELLOW + ship));
                     final int slot = gear.getFireballSlot();
-                    if (ship.equals("Catamaran")) {
+                    if (ship.contains("Catamaran")) {
                         player.getInventory().setItem(slot, PirateFireball.get(player));
                     } else {
                         if (plugin.getDependencies().getMythicMobs() != null) {
@@ -683,7 +683,7 @@ public class PlayerListener implements Listener {
     }
 
     /**
-     * Checks whether player is seated inside a Voyage Of The Seas ship
+     * Checks whether player is seated inside a Voyage Of The Seas ship at sea
      * @param player to check
      * @param biome containing ship
      * @return true if seated in ship
@@ -709,7 +709,7 @@ public class PlayerListener implements Listener {
     }
 
     /**
-     * Attempts to check whether player is effectively within range of a Voyage Of The Seas ship
+     * Attempts to check whether player is effectively within range of a Voyage Of The Seas ship at sea
      * @param player to check
      * @param biome containing ship
      * @return true if reasonably sure that ship is near
@@ -737,7 +737,7 @@ public class PlayerListener implements Listener {
     private boolean isLikelyInWater(final Player player) {
         // Check for player in VOTS Catamaran (NOTE: first because Player#isInWater can be true at high speeds)
         for (final Entity nearby : player.getNearbyEntities(4, 4, 4)) {
-            if (nearby instanceof Zombie && nearby.getName().contains("Catamaran")) {
+            if (nearby instanceof Skeleton && nearby.getName().contains("Catamaran")) {
                 if (player.getLocation().add(0, -2, 0).getBlock().isLiquid()) {
                     return false;
                 }

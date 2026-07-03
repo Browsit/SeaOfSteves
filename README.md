@@ -1,7 +1,7 @@
 ![Banner](https://browsit.org/external/frigate_banner_thin.png)
 
 # SeaOfSteves
-Sea of Steves is the ocean adventure gameplay plugin where you hunt (and fight) for treasure! **It is designed to be used with a predominantly water-based islands map or generator.** We humbly recommend [Isles of Alex](https://lectern.browsit.org/resources/resource/51/). Custom ships are _optional_ through [Voyage of the Seas](https://elitecreatures.com/shop/transportation/voyage-of-the-seas/?sld=browsitllc).
+Sea of Steves is the ocean adventure gameplay plugin where you hunt (and fight) for treasure! **It’s designed to be used with a predominantly water-based islands map or generator.** We humbly recommend [Isles of Alex](https://lectern.browsit.org/resources/resource/51/). Custom ships are _optional_ through [Voyage of the Seas](https://elitecreatures.com/shop/transportation/voyage-of-the-seas/?sld=browsitllc).
 
 ### PIRATE’S HONOR
 
@@ -22,7 +22,7 @@ The ocean can be a scary place, but you brought firepower! Defend your booty fro
 - [Vault](https://github.com/milkbowl/Vault) + an economy plugin
 
 ### Quick start:
-1. Copy this plugin jar and dependencies to your server’s _/plugins_ folder
+1. Copy this plugin jar and dependencies to your Java 21+ server’s _/plugins_ folder
 2. After startup, shut down server and open _/plugins/SeaOfSteves/config.yml_
 3. Update `sos.worlds` list with the names of worlds for use with SeaOfSteves
 

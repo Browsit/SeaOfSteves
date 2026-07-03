@@ -205,7 +205,7 @@ public class ItemUtil {
                 continue;
             }
             // Special case
-            if (item.equals("VOTSAmmoCannonBall") && shipType.equals("Catamaran")) {
+            if (item.equals("VOTSAmmoCannonBall") && shipType.contains("Catamaran")) {
                 continue;
             }
             final ItemStack mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack(item);

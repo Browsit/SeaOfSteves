@@ -11,6 +11,7 @@
 package org.browsit.seaofsteves.listener;
 
 import com.tcoded.folialib.FoliaLib;
+import com.ticxo.modelengine.api.ModelEngineAPI;
 import com.ticxo.modelengine.api.events.ModelDismountEvent;
 import com.ticxo.modelengine.api.events.ModelMountEvent;
 import com.ticxo.modelengine.api.model.ActiveModel;
@@ -21,7 +22,6 @@ import io.lumine.mythic.bukkit.adapters.BukkitEntity;
 import io.lumine.mythic.bukkit.events.MythicMobDeathEvent;
 import io.lumine.mythic.bukkit.events.MythicMobDespawnEvent;
 import io.lumine.mythic.bukkit.events.MythicMobSpawnEvent;
-import io.lumine.mythic.bukkit.events.MythicPostReloadedEvent;
 import io.lumine.mythic.core.skills.SkillMetadataImpl;
 import io.lumine.mythic.core.skills.SkillTriggers;
 import net.md_5.bungee.api.ChatMessageType;
@@ -34,7 +34,6 @@ import org.browsit.seaofsteves.settings.GearSettings;
 import org.browsit.seaofsteves.util.EntityUtil;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.ItemUtil;
-import org.browsit.seaofsteves.util.MythicUtil;
 import org.browsit.seaofsteves.util.NBTAPI;
 import org.browsit.seaofsteves.util.WorldUtil;
 import org.bukkit.Bukkit;
@@ -141,7 +140,7 @@ public class MythicListener implements Listener {
             final Player player = (Player) event.getPassenger();
             player.setGlowing(false); // If player ran '/sos scuttle'
 
-            // Remove auto-generated controllers
+            // Remove auto-applied VOTS items
             foliaLib.getScheduler().runAtEntityLater(player, () -> {
                 final ItemStack[] contents = player.getInventory().getContents();
                 for (final ItemStack item : contents) {
@@ -149,14 +148,14 @@ public class MythicListener implements Listener {
                         continue;
                     }
                     final String mythic = depends.getMythicMobs().getItemManager().getMythicTypeFromItem(item);
-                    if (mythic != null && mythic.endsWith("Controler")) {
+                    if (mythic != null && (mythic.endsWith("Controler") || mythic.endsWith("SeatChange"))) {
                         player.getInventory().remove(item);
                     }
                 }
-            }, 4L);
-            // Spawn controllers (and other gear) where desirable
+            }, 6L);
+            // Spawn naval gear
             foliaLib.getScheduler().runAtEntityLater(player, () -> ItemUtil.renewGearNaval(player, name), 8L);
-            // Ensure there are no duplicate controllers in hotbar
+            // Ensure there are no duplicate items in hotbar
             foliaLib.getScheduler().runAtEntityLater(player, () -> {
                 for (int slot = 0; slot < 8; slot++) {
                     final ItemStack item = player.getInventory().getItem(slot);
@@ -182,43 +181,42 @@ public class MythicListener implements Listener {
         if (!(event.getPassenger() instanceof Player)) {
             return;
         }
-        final ActiveModel am = event.getVehicle();
-        final String str = am.getBlueprint().getName().toLowerCase().replace("elitecreatures", "");
-        final String name = str.substring(0, 1).toUpperCase() + str.substring(1);
-        if (config.getVotsShips().contains(name) && depends.getMythicMobs() != null) {
-            final Player player = (Player) event.getPassenger();
-            final ItemStack dir = depends.getMythicMobs().getItemManager().getItemStack("VOTSDirectionControler");
-            final ItemStack spe = depends.getMythicMobs().getItemManager().getItemStack("VOTSSpecialControler");
-            for (final ItemStack i : player.getInventory().getContents()) {
-                if (i != null && i.getItemMeta() != null && i.getItemMeta().getLore() != null
-                        && i.getItemMeta().getLore().equals(dir.getItemMeta().getLore())) {
-                    foliaLib.getScheduler().runAtEntityLater(player, () -> {
-                        player.getInventory().remove(i);
-                    }, 20L);
-                } else if (i != null && i.getItemMeta() != null && i.getItemMeta().getLore() != null
-                        && i.getItemMeta().getLore().equals(spe.getItemMeta().getLore())) {
-                    foliaLib.getScheduler().runAtEntityLater(player, () -> {
-                        player.getInventory().remove(i);
-                    }, 20L);
+        if (depends.getMythicMobs() != null) {
+            final ActiveModel am = event.getVehicle();
+            final String str = am.getBlueprint().getName().toLowerCase().replace("elitecreatures", "");
+            final String name = str.substring(0, 1).toUpperCase() + str.substring(1);
+            boolean match = false;
+            for (final String ship : config.getVotsShips()) {
+                if (ship.contains(name)) {
+                    match = true;
+                    break;
                 }
             }
-            ItemUtil.renewGear(player, false);
+            if (!match) {
+                return;
+            }
+            final Player player = (Player) event.getPassenger();
             plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
-                final int slot = gear.getFireballSlot();
-                if (name.equalsIgnoreCase("Catamaran")) {
-                    player.getInventory().setItem(slot, PirateFireball.get(player));
-                } else {
-                    if (plugin.getDependencies().getMythicMobs() != null) {
-                        final String ball = plugin.getGearSettings().getNavalSlotsMythic().get(slot).get(0);
-                        final ItemStack mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack(ball);
-                        if (mythic == null) {
-                            plugin.getLogger().severe("Unknown mythic gear " + ball
-                                    + ", using default gear for naval slot " + slot);
+                final ActiveModel pair = ModelEngineAPI.getMountPairManager().getMountedPair(player.getUniqueId());
+                if (pair == null) {
+                    // Actually left ship (not a seat change)
+                    ItemUtil.renewGear(player, false);
+                    final int slot = gear.getFireballSlot();
+                    if (name.contains("Catamaran")) {
+                        player.getInventory().setItem(slot, PirateFireball.get(player));
+                    } else {
+                        if (plugin.getDependencies().getMythicMobs() != null) {
+                            final String ball = plugin.getGearSettings().getNavalSlotsMythic().get(slot).get(0);
+                            final ItemStack mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack(ball);
+                            if (mythic == null) {
+                                plugin.getLogger().severe("Unknown mythic gear " + ball
+                                        + ", using default gear for naval slot " + slot);
+                            }
+                            player.getInventory().setItem(slot, mythic);
                         }
-                        player.getInventory().setItem(slot, mythic);
                     }
                 }
-            }, 2L);
+            }, 8L);
         }
     }
 
@@ -282,11 +280,6 @@ public class MythicListener implements Listener {
             return;
         }
         rip(event.getEntity());
-    }
-
-    @EventHandler
-    public void onMythicReloaded(final MythicPostReloadedEvent event) {
-        MythicUtil.overwriteSkillsLater();
     }
 
     public void rip(final Entity boat) {

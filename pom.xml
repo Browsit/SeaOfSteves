@@ -6,7 +6,7 @@
 
     <groupId>org.browsit.seaofsteves</groupId>
     <artifactId>SeaOfSteves</artifactId>
-    <version>0.0.9-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
 
     <build>
         <plugins>
@@ -79,7 +79,6 @@
             <id>OnARandomBox</id>
             <url>https://repo.onarandombox.com/content/groups/public/</url>
         </repository>
-
         <repository>
             <!-- Folia -->
             <id>papermc</id>
@@ -201,7 +200,7 @@
         <dependency>
             <groupId>com.github.datatags.MobChipLite</groupId>
             <artifactId>mobchip-bukkit</artifactId>
-            <version>1.10.19</version>
+            <version>1.10.21</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

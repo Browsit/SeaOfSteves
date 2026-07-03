@@ -90,8 +90,6 @@ public class SeaOfSteves extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new EntityListener(this), this);
         if (getDependencies().isPluginAvailable("MythicMobs")) {
             getServer().getPluginManager().registerEvents(new MythicListener(this), this);
-            // Should happen in MythicReloadedEvent at startup
-            //MythicUtil.overwriteSkillsLater();
         }
         getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
         getServer().getPluginManager().registerEvents(new ProjectileListener(this), this);

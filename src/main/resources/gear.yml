@@ -98,13 +98,13 @@ sos:
         - "NAME_OF_ITEM_TO_USE_INSTEAD"
     slot-2:
       mythic:
-        - "VOTSShipRepairMedium"
+        - "NAME_OF_ITEM_TO_USE_INSTEAD"
     slot-3:
       mythic:
-        - "VOTSDirectionControler"
+        - "VOTSShipRepairMedium"
     slot-4:
       mythic:
-        - "VOTSSpecialControler"
+        - "NAME_OF_ITEM_TO_USE_INSTEAD"
     slot-5:
       mythic:
         - "VOTSAmmoCannonBall"

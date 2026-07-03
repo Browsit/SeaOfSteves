@@ -114,7 +114,7 @@ public class ResetTimer {
             final boolean useBossBar = plugin.getConfig().getBoolean("sos.multiverse-reset.use-bossbar");
 
             if (useBossBar && bar == null) {
-                bar = plugin.getServer().createBossBar(PlayerUtil.formatTime(0L), BarColor.WHITE, BarStyle.SEGMENTED_20);
+                bar = plugin.getServer().createBossBar(PlayerUtil.formatTime(0L, false), BarColor.WHITE, BarStyle.SEGMENTED_20);
             }
 
             plugin.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
@@ -179,7 +179,7 @@ public class ResetTimer {
                                     }
                                 }
                             }
-                            bar.setTitle(PlayerUtil.formatTime(remainingTime));
+                            bar.setTitle(PlayerUtil.formatTime(remainingTime, false));
                         } else {
                             bar.removePlayer(p);
                         }

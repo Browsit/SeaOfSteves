@@ -1,4 +1,4 @@
-![Banner](https://browsit.org/external/frigate_banner_thin.png)
+<img width="1280" height="360" alt="Banner" src="https://github.com/user-attachments/assets/e89d3871-d478-4300-89e1-b51130bf3653" />
 
 # SeaOfSteves
 Sea of Steves is the ocean adventure gameplay plugin where you hunt (and fight) for treasure! **It’s designed to be used with a predominantly water-based islands map or generator.** We humbly recommend [Isles of Alex](https://lectern.browsit.org/resources/resource/51/). Custom ships are _optional_ through [Voyage of the Seas](https://elitecreatures.com/shop/transportation/voyage-of-the-seas/?sld=browsitllc).

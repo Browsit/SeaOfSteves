@@ -19,11 +19,14 @@ import io.lumine.mythic.core.skills.SkillTriggers;
 import org.browsit.seaofsteves.SeaOfSteves;
 import org.browsit.seaofsteves.boss.type.EnemyShip;
 import org.browsit.seaofsteves.boss.type.KingBlaze;
+import org.browsit.seaofsteves.boss.type.Megalodon;
 import org.browsit.seaofsteves.boss.type.Shark;
 import org.browsit.seaofsteves.boss.type.lavablock.Tephra;
 import org.browsit.seaofsteves.depend.Dependencies;
 import org.browsit.seaofsteves.gear.type.PirateEmpty;
+import org.browsit.seaofsteves.gear.type.boat.PirateDingy;
 import org.browsit.seaofsteves.player.Pirate;
+import org.browsit.seaofsteves.util.EntityUtil;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.ItemUtil;
 import org.browsit.seaofsteves.util.NBTAPI;
@@ -141,6 +144,7 @@ public class SosExecutor implements CommandExecutor, TabExecutor {
                                 .replace("<time>", PlayerUtil.formatTime(seconds * 1000L, true)));
                         sender.sendMessage(ChatColor.GRAY + IO.getLang("destroyShipWarning"));
                     }, 2L);
+                    player.setCooldown(PirateDingy.get(player).getType(), seconds * 20);
                     player.setCooldown(PirateEmpty.get(player).getType(), seconds * 20);
                     plugin.getFoliaLib().getScheduler().runAtEntityLater(player, () -> {
                         player.setGlowing(false);
@@ -165,26 +169,35 @@ public class SosExecutor implements CommandExecutor, TabExecutor {
                     return false;
                 }
                 final Player player = (Player)sender;
-                if (args[1].equalsIgnoreCase("KingBlaze")) {
+                if (args[1].equalsIgnoreCase("EnemyShip")) {
+                    if (!plugin.getBossSettings().isEnemyShipEnabled()
+                            || plugin.getChanceSettings().getOceanSpawnEnemyShip() < 1) {
+                        sender.sendMessage(ChatColor.RED + "Enemy ships are not enabled, see boss.yml and chance.yml");
+                        return false;
+                    }
+                    new EnemyShip(plugin, player);
+                } else if (args[1].equalsIgnoreCase("KingBlaze")) {
                     if (!plugin.getBossSettings().isKingBlazeEnabled()) {
-                        sender.sendMessage(ChatColor.RED + "King Blaze is not enabled, see boss.yml ");
+                        sender.sendMessage(ChatColor.RED + "King Blaze is not enabled, see boss.yml");
                         return false;
                     }
                     final Block block = player.getTargetBlock(null, 50);
                     new KingBlaze(plugin, block.getLocation());
+                } else if (args[1].equalsIgnoreCase("Megalodon")) {
+                    if (!plugin.getBossSettings().isMegalodonEnabled()
+                            || plugin.getChanceSettings().getOceanSpawnMegalodon() < 1) {
+                        sender.sendMessage(ChatColor.RED + "Megalodon is not enabled, see boss.yml and chance.yml");
+                        return false;
+                    }
+                    final Block b = player.getTargetBlock(null, 50);
+                    new Megalodon(plugin, b.getLocation(), EntityUtil.determineMegalodonTarget(player));
                 } else if (args[1].equalsIgnoreCase("Shark")) {
                     if (!plugin.getBossSettings().isSharkEnabled()) {
-                        sender.sendMessage(ChatColor.RED + "Shark is not enabled, see boss.yml ");
+                        sender.sendMessage(ChatColor.RED + "Shark is not enabled, see boss.yml");
                         return false;
                     }
                     final Block b = player.getTargetBlock(null, 50);
                     new Shark(plugin, b.getLocation(), player);
-                } else if (args[1].equalsIgnoreCase("EnemyShip")) {
-                    if (plugin.getChanceSettings().getOceanSpawnEnemyShip() < 1) {
-                        sender.sendMessage(ChatColor.RED + "Enemy ships are not enabled, see chance.yml ");
-                        return false;
-                    }
-                    new EnemyShip(plugin, player);
                 }
                 return true;
             }
@@ -235,9 +248,10 @@ public class SosExecutor implements CommandExecutor, TabExecutor {
                 return completions;
             } else if (args.length == 2 && args[0].trim().equalsIgnoreCase("spawn")) {
                 if (sender.hasPermission("seaofsteves.sos.spawn")) {
-                    completions.add("KingBlaze");
-                    completions.add("Shark");
                     completions.add("EnemyShip");
+                    completions.add("KingBlaze");
+                    completions.add("Megalodon");
+                    completions.add("Shark");
                 }
                 return completions;
             }

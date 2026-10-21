@@ -22,6 +22,7 @@ import io.lumine.mythic.bukkit.adapters.BukkitEntity;
 import io.lumine.mythic.bukkit.events.MythicMobDeathEvent;
 import io.lumine.mythic.bukkit.events.MythicMobDespawnEvent;
 import io.lumine.mythic.bukkit.events.MythicMobSpawnEvent;
+import io.lumine.mythic.core.mobs.ActiveMob;
 import io.lumine.mythic.core.skills.SkillMetadataImpl;
 import io.lumine.mythic.core.skills.SkillTriggers;
 import net.md_5.bungee.api.ChatMessageType;
@@ -34,15 +35,20 @@ import org.browsit.seaofsteves.settings.GearSettings;
 import org.browsit.seaofsteves.util.EntityUtil;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.ItemUtil;
+import org.browsit.seaofsteves.util.MythicUtil;
 import org.browsit.seaofsteves.util.NBTAPI;
 import org.browsit.seaofsteves.util.WorldUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Sound;
 import org.bukkit.entity.Boat;
+import org.bukkit.entity.Dolphin;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Skeleton;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPlaceEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -83,7 +89,7 @@ public class MythicListener implements Listener {
         NBTAPI.addNBT(event.getEntity(), "sos_owner", player.getUniqueId().toString());
         event.setCancelled(true);
         boolean isPlayerNearby = false;
-        for (Entity nearby : event.getEntity().getNearbyEntities(7, 7, 7)) {
+        for (final Entity nearby : event.getEntity().getNearbyEntities(7, 7, 7)) {
             if (nearby instanceof Player) {
                 if (isPlayerNearby) {
                     IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.RED + IO.getLang("nearbyPlayerLimit"));
@@ -129,9 +135,8 @@ public class MythicListener implements Listener {
             return;
         }
         final ActiveModel am = event.getVehicle();
-        final String str = am.getBlueprint().getName().toLowerCase().replace("elitecreatures", "");
-        final String name = str.substring(0, 1).toUpperCase() + str.substring(1);
-        if (!config.getVotsShips().contains(name)) {
+        final String name = MythicUtil.getVotsShipName(am);
+        if (name == null) {
             return;
         }
         if (event.getVehicle().getMountManager().isPresent() && am.getMountManager().get().hasRiders()) {
@@ -183,16 +188,8 @@ public class MythicListener implements Listener {
         }
         if (depends.getMythicMobs() != null) {
             final ActiveModel am = event.getVehicle();
-            final String str = am.getBlueprint().getName().toLowerCase().replace("elitecreatures", "");
-            final String name = str.substring(0, 1).toUpperCase() + str.substring(1);
-            boolean match = false;
-            for (final String ship : config.getVotsShips()) {
-                if (ship.contains(name)) {
-                    match = true;
-                    break;
-                }
-            }
-            if (!match) {
+            final String name = MythicUtil.getVotsShipName(am);
+            if (name == null) {
                 return;
             }
             final Player player = (Player) event.getPassenger();
@@ -202,7 +199,7 @@ public class MythicListener implements Listener {
                     // Actually left ship (not a seat change)
                     ItemUtil.renewGear(player, false);
                     final int slot = gear.getFireballSlot();
-                    if (name.contains("Catamaran")) {
+                    if (name.contains("catamaran")) {
                         player.getInventory().setItem(slot, PirateFireball.get(player));
                     } else {
                         if (plugin.getDependencies().getMythicMobs() != null) {
@@ -228,8 +225,7 @@ public class MythicListener implements Listener {
         if (!config.isVotsEnabled()) {
             return;
         }
-        if (event.getMob().getDisplayName() != null
-                && !config.getVotsShips().contains(ChatColor.stripColor(event.getMob().getDisplayName()))) {
+        if (!isVotsShip(event.getMob())) {
             return;
         }
         if (!event.getSpawnReason().equals(SpawnReason.SUMMON)) {
@@ -260,8 +256,7 @@ public class MythicListener implements Listener {
         if (!gear.isDingyEnabled()) {
             return;
         }
-        if (event.getMob().getDisplayName() != null
-                && !config.getVotsShips().contains(ChatColor.stripColor(event.getMob().getDisplayName()))) {
+        if (!isVotsShip(event.getMob())) {
             return;
         }
         rip(event.getEntity());
@@ -275,16 +270,53 @@ public class MythicListener implements Listener {
         if (!gear.isDingyEnabled()) {
             return;
         }
-        if (event.getMob().getDisplayName() != null
-                && !config.getVotsShips().contains(ChatColor.stripColor(event.getMob().getDisplayName()))) {
+        if (!isVotsShip(event.getMob())) {
             return;
         }
         rip(event.getEntity());
     }
 
-    public void rip(final Entity boat) {
-        if (NBTAPI.hasNBT(boat, "sos_owner")) {
-            final String owner = NBTAPI.getNBT(boat, "sos_owner");
+    @EventHandler
+    public void onMegalodonDamageShip(final EntityDamageByEntityEvent event) {
+        final Entity damager = event.getDamager();
+        final Entity victim = event.getEntity();
+        if (!WorldUtil.isAllowedWorld(damager.getWorld().getName())) {
+            return;
+        }
+        if (!config.isVotsEnabled() || depends.getMythicMobs() == null) {
+            return;
+        }
+        if (!plugin.getBossSettings().getMegalodonMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
+            return;
+        }
+        if (!(damager instanceof Dolphin)) {
+            return;
+        }
+        if (!NBTAPI.hasNBT(damager, "sos_boss")) {
+            return;
+        }
+        if (!(victim instanceof Skeleton)) {
+            return;
+        }
+        event.setCancelled(true);
+        final Optional<ActiveMob> optActiveMob = depends.getMythicMobs().getMobManager().getActiveMob(victim.getUniqueId());
+        optActiveMob.ifPresent(activeMob -> {
+            if (activeMob.getMobType().toLowerCase().contains("frigate")) {
+                activeMob.getEntity().damage(100f);
+            } else if (activeMob.getMobType().toLowerCase().contains("galleon")) {
+                activeMob.getEntity().damage(50f);
+            } else {
+                activeMob.getEntity().damage(20f);
+            }
+            activeMob.signalDamaged();
+            victim.getWorld().playSound(victim, Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR, 1f, 1f);
+            victim.getWorld().playSound(victim, Sound.ENTITY_HOSTILE_SPLASH, 1f, 1f);
+        });
+    }
+
+    public void rip(final Entity ship) {
+        if (NBTAPI.hasNBT(ship, "sos_owner")) {
+            final String owner = NBTAPI.getNBT(ship, "sos_owner");
             if (owner == null) {
                 return;
             }
@@ -299,5 +331,16 @@ public class MythicListener implements Listener {
                 }, 2L);
             }
         }
+    }
+
+    private boolean isVotsShip(final ActiveMob activeMob) {
+        boolean match = false;
+        for (final String name : config.getVotsShips()) {
+            if (activeMob.getDisplayName() != null
+                    && name.contains(ChatColor.stripColor(activeMob.getDisplayName()))) {
+                match = true;
+            }
+        }
+        return match;
     }
 }

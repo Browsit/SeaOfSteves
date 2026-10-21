@@ -16,6 +16,13 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 public class BossSettings {
     private final SeaOfSteves plugin;
+    private boolean enemyShipEnabled;
+    private String enemyShipBiome;
+    private String enemyShipName;
+    private String enemyShipDrop;
+    private double enemyShipHealth;
+    private double enemyShipScale;
+    private String enemyShipMythic;
     private boolean kingBlazeEnabled;
     private String kingBlazeBiome;
     private String kingBlazeName;
@@ -26,6 +33,16 @@ public class BossSettings {
     private boolean kingBlazeUseBossBar;
     private boolean kingBlazeUseNameTag;
     private String kingBlazeMythic;
+    private boolean megalodonEnabled;
+    private String megalodonBiome;
+    private String megalodonName;
+    private String megalodonDrop;
+    private double megalodonHealth;
+    private long megalodonRespawn;
+    private double megalodonScale;
+    private boolean megalodonUseBossBar;
+    private boolean megalodonUseNameTag;
+    private String megalodonMythic;
     private boolean sharkEnabled;
     private String sharkBiome;
     private String sharkName;
@@ -34,16 +51,65 @@ public class BossSettings {
     private long sharkRespawn;
     private double sharkScale;
     private String sharkMythic;
-    private boolean enemyShipEnabled;
-    private String enemyShipBiome;
-    private String enemyShipName;
-    private String enemyShipDrop;
-    private double enemyShipHealth;
-    private double enemyShipScale;
-    private String enemyShipMythic;
 
     public BossSettings(final SeaOfSteves plugin) {
         this.plugin = plugin;
+    }
+
+    public boolean isEnemyShipEnabled() {
+        return enemyShipEnabled;
+    }
+
+    public void setEnemyShipEnabled(final boolean enemyShipEnabled) {
+        this.enemyShipEnabled = enemyShipEnabled;
+    }
+
+    public String getEnemyShipBiome() {
+        return enemyShipBiome;
+    }
+
+    public void setEnemyShipBiome(final String enemyShipBiome) {
+        this.enemyShipBiome = enemyShipBiome;
+    }
+
+    public String getEnemyShipName() {
+        return enemyShipName;
+    }
+
+    public void setEnemyShipName(final String enemyShipName) {
+        this.enemyShipName = enemyShipName;
+    }
+
+    public String getEnemyShipDrop() {
+        return enemyShipDrop;
+    }
+
+    public void setEnemyShipDrop(final String enemyShipDrop) {
+        this.enemyShipDrop = enemyShipDrop;
+    }
+
+    public double getEnemyShipHealth() {
+        return enemyShipHealth;
+    }
+
+    public void setEnemyShipHealth(final double enemyShipHealth) {
+        this.enemyShipHealth = enemyShipHealth;
+    }
+
+    public double getEnemyShipScale() {
+        return enemyShipScale;
+    }
+
+    public void setEnemyShipScale(final double enemyShipScale) {
+        this.enemyShipScale = enemyShipScale;
+    }
+
+    public String getEnemyShipMythic() {
+        return enemyShipMythic;
+    }
+
+    public void setEnemyShipMythic(final String enemyShipMythic) {
+        this.enemyShipMythic = enemyShipMythic;
     }
 
     public boolean isKingBlazeEnabled() {
@@ -126,6 +192,87 @@ public class BossSettings {
         this.kingBlazeMythic = kingBlazeMythic;
     }
 
+
+    public boolean isMegalodonEnabled() {
+        return megalodonEnabled;
+    }
+
+    public void setMegalodonEnabled(final boolean megalodonEnabled) {
+        this.megalodonEnabled = megalodonEnabled;
+    }
+
+    public String getMegalodonBiome() {
+        return megalodonBiome;
+    }
+
+    public void setMegalodonBiome(final String megalodonBiome) {
+        this.megalodonBiome = megalodonBiome;
+    }
+
+    public String getMegalodonName() {
+        return megalodonName;
+    }
+
+    public void setMegalodonName(final String megalodonName) {
+        this.megalodonName = megalodonName;
+    }
+
+    public String getMegalodonDrop() {
+        return megalodonDrop;
+    }
+
+    public void setMegalodonDrop(final String megalodonDrop) {
+        this.megalodonDrop = megalodonDrop;
+    }
+
+    public double getMegalodonHealth() {
+        return megalodonHealth;
+    }
+
+    public void setMegalodonHealth(final double megalodonHealth) {
+        this.megalodonHealth = megalodonHealth;
+    }
+
+    public long getMegalodonRespawn() {
+        return megalodonRespawn;
+    }
+
+    public void setMegalodonRespawn(final long megalodonRespawn) {
+        this.megalodonRespawn = megalodonRespawn;
+    }
+
+    public double getMegalodonScale() {
+        return megalodonScale;
+    }
+
+    public void setMegalodonScale(final double megalodonScale) {
+        this.megalodonScale = megalodonScale;
+    }
+
+    public boolean canMegalodonUseBossBar() {
+        return megalodonUseBossBar;
+    }
+
+    public void setMegalodonUseBossBar(final boolean megalodonUseBossBar) {
+        this.megalodonUseBossBar = megalodonUseBossBar;
+    }
+
+    public boolean canMegalodonUseNameTag() {
+        return megalodonUseNameTag;
+    }
+
+    public void setMegalodonUseNameTag(final boolean megalodonUseNameTag) {
+        this.megalodonUseNameTag = megalodonUseNameTag;
+    }
+
+    public String getMegalodonMythic() {
+        return megalodonMythic;
+    }
+
+    public void setMegalodonMythic(final String megalodonMythic) {
+        this.megalodonMythic = megalodonMythic;
+    }
+
     public boolean isSharkEnabled() {
         return sharkEnabled;
     }
@@ -190,67 +337,19 @@ public class BossSettings {
         this.sharkMythic = sharkMythic;
     }
 
-    public boolean isEnemyShipEnabled() {
-        return enemyShipEnabled;
-    }
-
-    public void setEnemyShipEnabled(final boolean enemyShipEnabled) {
-        this.enemyShipEnabled = enemyShipEnabled;
-    }
-
-    public String getEnemyShipBiome() {
-        return enemyShipBiome;
-    }
-
-    public void setEnemyShipBiome(final String enemyShipBiome) {
-        this.enemyShipBiome = enemyShipBiome;
-    }
-
-    public String getEnemyShipName() {
-        return enemyShipName;
-    }
-
-    public void setEnemyShipName(final String enemyShipName) {
-        this.enemyShipName = enemyShipName;
-    }
-
-    public String getEnemyShipDrop() {
-        return enemyShipDrop;
-    }
-
-    public void setEnemyShipDrop(final String enemyShipDrop) {
-        this.enemyShipDrop = enemyShipDrop;
-    }
-
-    public double getEnemyShipHealth() {
-        return enemyShipHealth;
-    }
-
-    public void setEnemyShipHealth(final double enemyShipHealth) {
-        this.enemyShipHealth = enemyShipHealth;
-    }
-
-    public double getEnemyShipScale() {
-        return enemyShipScale;
-    }
-
-    public void setEnemyShipScale(final double enemyShipScale) {
-        this.enemyShipScale = enemyShipScale;
-    }
-
-    public String getEnemyShipMythic() {
-        return enemyShipMythic;
-    }
-
-    public void setEnemyShipMythic(final String enemyShipMythic) {
-        this.enemyShipMythic = enemyShipMythic;
-    }
-
     public void load() {
         final FileConfiguration cfg = IO.getBoss();
-        final String prefixKingBlaze = "sos.boss.king-blaze.";
-        final String prefixShark = "sos.boss.shark.";
         final String prefixEnemyShip = "sos.boss.enemy-ship";
+        final String prefixKingBlaze = "sos.boss.king-blaze.";
+        final String prefixMegalodon = "sos.boss.megalodon.";
+        final String prefixShark = "sos.boss.shark.";
+        enemyShipEnabled = cfg.getBoolean(prefixEnemyShip + "enabled", true);
+        enemyShipBiome = cfg.getString(prefixEnemyShip + "biome", "WARM_OCEAN");
+        enemyShipName = cfg.getString(prefixEnemyShip + "name", "Pirate");
+        enemyShipDrop = cfg.getString(prefixEnemyShip + "drop", "IRON_INGOT");
+        enemyShipHealth = cfg.getDouble(prefixEnemyShip + "health", 20.0);
+        enemyShipScale = cfg.getDouble(prefixEnemyShip + "scale", 1.0);
+        enemyShipMythic = cfg.getString(prefixEnemyShip + "mythic", "NAME_OF_MOB_TO_USE_INSTEAD");
         kingBlazeEnabled = cfg.getBoolean(prefixKingBlaze + "enabled", true);
         kingBlazeBiome = cfg.getString(prefixKingBlaze + "biome", "VOLCANO_PIT");
         kingBlazeName = cfg.getString(prefixKingBlaze + "name", "King Blaze");
@@ -261,6 +360,15 @@ public class BossSettings {
         kingBlazeUseBossBar = cfg.getBoolean(prefixKingBlaze + "use-bossbar", true);
         kingBlazeUseNameTag = cfg.getBoolean(prefixKingBlaze + "use-nametag", true);
         kingBlazeMythic = cfg.getString(prefixKingBlaze + "mythic", "NAME_OF_MOB_TO_USE_INSTEAD");
+        megalodonEnabled = cfg.getBoolean(prefixMegalodon + "enabled", true);
+        megalodonBiome = cfg.getString(prefixMegalodon + "biome", "WARM_OCEAN");
+        megalodonName = cfg.getString(prefixMegalodon + "name", "Megalodon");
+        megalodonDrop = cfg.getString(prefixMegalodon + "drop", "DIAMOND");
+        megalodonHealth = cfg.getDouble(prefixMegalodon + "health", 150.0);
+        megalodonScale = cfg.getDouble(prefixMegalodon + "scale", 4.0);
+        megalodonUseBossBar = cfg.getBoolean(prefixMegalodon + "use-bossbar", true);
+        megalodonUseNameTag = cfg.getBoolean(prefixMegalodon + "use-nametag", true);
+        megalodonMythic = cfg.getString(prefixMegalodon + "mythic", "NAME_OF_MOB_TO_USE_INSTEAD");
         sharkEnabled = cfg.getBoolean(prefixShark + "enabled", true);
         sharkBiome = cfg.getString(prefixShark + "biome", "WARM_OCEAN");
         sharkName = cfg.getString(prefixShark + "name", "Shark");
@@ -269,12 +377,5 @@ public class BossSettings {
         sharkRespawn = cfg.getLong(prefixShark + "respawn", 20000L);
         sharkScale = cfg.getDouble(prefixShark + "scale", 1.2);
         sharkMythic = cfg.getString(prefixShark + "mythic", "NAME_OF_MOB_TO_USE_INSTEAD");
-        enemyShipEnabled = cfg.getBoolean(prefixEnemyShip + "enabled", true);
-        enemyShipBiome = cfg.getString(prefixEnemyShip + "biome", "WARM_OCEAN");
-        enemyShipName = cfg.getString(prefixEnemyShip + "name", "Pirate");
-        enemyShipDrop = cfg.getString(prefixEnemyShip + "drop", "IRON_INGOT");
-        enemyShipHealth = cfg.getDouble(prefixEnemyShip + "health", 20.0);
-        enemyShipScale = cfg.getDouble(prefixEnemyShip + "scale", 1.0);
-        enemyShipMythic = cfg.getString(prefixEnemyShip + "mythic", "NAME_OF_MOB_TO_USE_INSTEAD");
     }
 }

@@ -1,5 +1,6 @@
 package org.browsit.seaofsteves.util;
 
+import com.ticxo.modelengine.api.model.ActiveModel;
 import io.lumine.mythic.api.mobs.MythicMob;
 import io.lumine.mythic.bukkit.BukkitAdapter;
 import io.lumine.mythic.core.mobs.ActiveMob;
@@ -24,5 +25,18 @@ public class MythicUtil {
             return (LivingEntity) activeMob.getEntity().getBukkitEntity();
         }
         return null;
+    }
+
+    @Nullable
+    public static String getVotsShipName(final ActiveModel am) {
+        final String name = am.getBlueprint().getName().toLowerCase().replace("elitecreatures", "");
+        boolean match = false;
+        for (final String ship : plugin.getConfigSettings().getVotsShips()) {
+            if (ship.toLowerCase().contains(name)) {
+                match = true;
+                break;
+            }
+        }
+        return match ? name : null;
     }
 }

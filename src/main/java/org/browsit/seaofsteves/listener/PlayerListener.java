@@ -23,6 +23,7 @@ import org.browsit.seaofsteves.api.event.PirateFishCaughtEvent;
 import org.browsit.seaofsteves.api.event.PirateOpenTreasureEvent;
 import org.browsit.seaofsteves.boss.type.EnemyShip;
 import org.browsit.seaofsteves.boss.type.KingBlaze;
+import org.browsit.seaofsteves.boss.type.Megalodon;
 import org.browsit.seaofsteves.boss.type.Shark;
 import org.browsit.seaofsteves.boss.type.lavablock.Tephra;
 import org.browsit.seaofsteves.depend.Dependencies;
@@ -36,8 +37,10 @@ import org.browsit.seaofsteves.settings.BossSettings;
 import org.browsit.seaofsteves.settings.ChanceSettings;
 import org.browsit.seaofsteves.settings.ConfigSettings;
 import org.browsit.seaofsteves.settings.GearSettings;
+import org.browsit.seaofsteves.util.EntityUtil;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.ItemUtil;
+import org.browsit.seaofsteves.util.MythicUtil;
 import org.browsit.seaofsteves.util.NBTAPI;
 import org.browsit.seaofsteves.util.PlayerUtil;
 import org.browsit.seaofsteves.util.TerraUtil;
@@ -51,6 +54,7 @@ import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.Boat;
@@ -63,7 +67,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Villager;
-import org.bukkit.entity.Zombie;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -104,7 +107,7 @@ public class PlayerListener implements Listener {
     private final ConcurrentHashMap<UUID, Long> lastEnteredVolcano = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, Long> lastKilledBoss = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<UUID, BossBar> bossBars = new ConcurrentHashMap<>();
-    public static final List<String> BOAT_TYPE = Arrays.asList("OAK_BOAT", "ACACIA_BOAT", "BIRCH_BOAT", "CHERRY_BOAT",
+        public static final List<String> BOAT_TYPE = Arrays.asList("OAK_BOAT", "ACACIA_BOAT", "BIRCH_BOAT", "CHERRY_BOAT",
             "DARK_OAK_BOAT", "JUNGLE_BOAT", "MANGROVE_BOAT", /*"PALE_OAK_BOAT",*/ "BAMBOO_RAFT");
     public static List<String> VOTS_TYPE = null;
     private final Random random = new Random();
@@ -230,9 +233,16 @@ public class PlayerListener implements Listener {
                     }
                 }
             }
+            if (biome.name().equalsIgnoreCase(bosses.getMegalodonBiome())) {
+                if (!config.isVotsEnabled() || isNearVotsShipAtSea(player, biome)) {
+                    if (random.nextInt(chance.getOceanSpawnMegalodon()) == 1) {
+                        new Megalodon(plugin, player.getLocation(), EntityUtil.determineMegalodonTarget(player));
+                    }
+                }
+            }
             if (lastEnteredOcean.containsKey(player.getUniqueId())) {
                 for (final Entity nearby : player.getNearbyEntities(30, 20, 30)) {
-                    if (nearby instanceof Dolphin) {
+                    if (nearby instanceof Dolphin && !NBTAPI.hasNBT(nearby, "sos_boss")) {
                         nearby.remove();
                         IO.sendMessage(player, ChatMessageType.ACTION_BAR, ChatColor.YELLOW + IO.getLang("moveSharkFailed"));
                     }
@@ -308,7 +318,7 @@ public class PlayerListener implements Listener {
                                 final Location toSpawn = TerraUtil.getTerraBiomeCenter(terraBiome, event.getTo());
                                 final KingBlaze boss = new KingBlaze(plugin, toSpawn);
                                 if (boss.getBossBar() != null) {
-                                    bossBars.put(boss.getEntity().getUniqueId(), boss.getBossBar());
+                                    registerBossBar(boss.getEntity().getUniqueId(), boss.getBossBar());
                                 }
                                 plugin.getLogger().info(bossName + " spawned by player of UUID " + player.getUniqueId());
                             }
@@ -331,10 +341,10 @@ public class PlayerListener implements Listener {
         if (!NBTAPI.hasNBT(entity, "sos_boss")) {
             return;
         }
-        if (!bosses.getKingBlazeMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) { // Use mythic BossBar instead
-            return;
-        }
         if (entity instanceof Blaze) {
+            if (!bosses.getKingBlazeMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
+                return;
+            }
             if (event.getCause().equals(EntityDamageEvent.DamageCause.DROWNING)) {
                 event.setCancelled(true);
                 return;
@@ -344,6 +354,19 @@ public class PlayerListener implements Listener {
                 final Blaze blaze = (Blaze) entity;
                 double normalized = (blaze.getHealth() - event.getDamage())
                         / blaze.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
+                normalized = Math.max(0.0, normalized);
+                normalized = Math.min(1.0, normalized);
+                bossBars.get(uuid).setProgress(normalized);
+            }
+        } else if (entity instanceof Dolphin) {
+            if (!bosses.getMegalodonMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
+                return;
+            }
+            final UUID uuid = entity.getUniqueId();
+            if (bosses.canMegalodonUseBossBar() && bossBars.containsKey(uuid)) {
+                final Dolphin dolphin = (Dolphin) entity;
+                double normalized = (dolphin.getHealth() - event.getDamage())
+                        / dolphin.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue();
                 normalized = Math.max(0.0, normalized);
                 normalized = Math.min(1.0, normalized);
                 bossBars.get(uuid).setProgress(normalized);
@@ -371,30 +394,38 @@ public class PlayerListener implements Listener {
         }
         // TODO - Use storage for respawn timer (persistence)
         final Player player = entity.getKiller();
-        IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.GREEN + IO.getLang("bossDefeated").replace("<time>",
-                PlayerUtil.formatTime(plugin.getBossSettings().getKingBlazeRespawn(), true)));
-        lastKilledBoss.put(player.getUniqueId(), System.currentTimeMillis());
-        if (!bosses.getKingBlazeMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) { // Use mythic Drops instead
-            return;
-        }
         if (entity instanceof Blaze) {
+            IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.GREEN + IO.getLang("bossDefeated").replace("<time>",
+                    PlayerUtil.formatTime(plugin.getBossSettings().getKingBlazeRespawn(), true)));
+            lastKilledBoss.put(player.getUniqueId(), System.currentTimeMillis());
+            if (!bosses.getKingBlazeMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
+                return;
+            }
             final Material material = Material.getMaterial(bosses.getKingBlazeDrop());
             if (material != null) {
                 ItemUtil.addItem(player, new ItemStack(material));
             } else {
                 plugin.getLogger().severe("Invalid king-blaze drop material " + bosses.getKingBlazeDrop());
             }
+            if (bosses.canKingBlazeUseBossBar() && bossBars.containsKey(entity.getUniqueId())) {
+                bossBars.get(entity.getUniqueId()).removeAll();
+                bossBars.remove(entity.getUniqueId());
+            }
         } else if (entity instanceof Dolphin) {
-            final Material material = Material.getMaterial(bosses.getSharkDrop());
+            IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.GREEN + IO.getLang("megalodonDefeat"));
+            if (bosses.canMegalodonUseBossBar() && bossBars.containsKey(entity.getUniqueId())) {
+                bossBars.get(entity.getUniqueId()).removeAll();
+                bossBars.remove(entity.getUniqueId());
+            }
+            if (!bosses.getMegalodonMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
+                return;
+            }
+            final Material material = Material.getMaterial(bosses.getMegalodonDrop());
             if (material != null) {
                 ItemUtil.addItem(player, new ItemStack(material));
             } else {
-                plugin.getLogger().severe("Invalid shark drop material " + bosses.getSharkDrop());
+                plugin.getLogger().severe("Invalid megalodon drop material " + bosses.getMegalodonDrop());
             }
-        }
-        if (bosses.canKingBlazeUseBossBar() && bossBars.containsKey(entity.getUniqueId())) {
-            bossBars.get(entity.getUniqueId()).removeAll();
-            bossBars.remove(entity.getUniqueId());
         }
     }
 
@@ -655,7 +686,8 @@ public class PlayerListener implements Listener {
         player.setGlowing(false);
         lastEnteredOcean.remove(event.getEntity().getUniqueId());
         for (Entity e : event.getEntity().getNearbyEntities(35, 20, 35)) {
-            if (e instanceof Dolphin) {
+            if (e instanceof Dolphin && NBTAPI.hasNBT(e, "sos_boss")) {
+                removeBossBar(e.getUniqueId());
                 e.remove();
             }
         }
@@ -696,10 +728,8 @@ public class PlayerListener implements Listener {
         if (WorldUtil.isOceanBiome(biome)) {
             final ActiveModel modeledEntity = ModelEngineAPI.getMountPairManager().getMountedPair(player.getUniqueId());
             if (modeledEntity != null) {
-                for (final String str : modeledEntity.getModeledEntity().getModels().keySet()) {
-                    String name = str.toLowerCase().replace("elitecreatures", "");
-                    name = name.substring(0, 1).toUpperCase() + name.substring(1);
-                    if (VOTS_TYPE.contains(name)) {
+                for (final ActiveModel am : modeledEntity.getModeledEntity().getModels().values()) {
+                    if (MythicUtil.getVotsShipName(am) != null) {
                         return true;
                     }
                 }
@@ -716,11 +746,14 @@ public class PlayerListener implements Listener {
      */
     private boolean isNearVotsShipAtSea(final Player player, final Biome biome) {
         if (WorldUtil.isOceanBiome(biome)) {
-            for (final Entity e : player.getNearbyEntities(4, 4, 4)) {
-                if (e instanceof Zombie) {
-                    if (VOTS_TYPE.contains(ChatColor.stripColor(e.getName())) && !e.isCustomNameVisible()
-                            && e.getTrackedBy().contains(player)) {
-                        return true;
+            for (final Entity e : player.getNearbyEntities(5, 5, 5)) {
+                if (e instanceof Skeleton) {
+                    if (!e.isCustomNameVisible() && e.getTrackedBy().contains(player)) {
+                        for (final String type : VOTS_TYPE) {
+                            if (type.toLowerCase().contains(ChatColor.stripColor(e.getName().toLowerCase()))) {
+                                return true;
+                            }
+                        }
                     }
                 }
             }
@@ -746,6 +779,13 @@ public class PlayerListener implements Listener {
         // Check for player blatantly in water
         if (player.isInWater()) {
             return true;
+        }
+        // Check for player in non-waterlogged block, such as slab
+        final Block b = player.getLocation().getBlock();
+        if (b.getBlockData() instanceof Waterlogged) {
+            if (!((Waterlogged) b.getBlockData()).isWaterlogged()) {
+                return false;
+            }
         }
         // Check for player standing on vanilla boat
         if (!player.isInsideVehicle()) {
@@ -812,5 +852,16 @@ public class PlayerListener implements Listener {
             return ChatColor.YELLOW + IO.getLang("moveDetectCloser");
         }
         return ChatColor.GREEN + IO.getLang("moveDetectNearby");
+    }
+
+    public void registerBossBar(final UUID entityId, final BossBar bar) {
+        bossBars.put(entityId, bar);
+    }
+
+    public void removeBossBar(final UUID entityId) {
+        final BossBar bar = bossBars.remove(entityId);
+        if (bar != null) {
+            bar.removeAll();
+        }
     }
 }

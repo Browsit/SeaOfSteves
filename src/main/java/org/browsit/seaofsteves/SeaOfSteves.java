@@ -29,7 +29,11 @@ import org.browsit.seaofsteves.settings.GearSettings;
 import org.browsit.seaofsteves.timer.ResetTimer;
 import org.browsit.seaofsteves.util.IO;
 import org.browsit.seaofsteves.util.WorldUtil;
+import org.browsit.seaofsteves.util.NBTAPI;
+import org.bukkit.World;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,6 +53,7 @@ public class SeaOfSteves extends JavaPlugin {
     private GearSettings gear;
     private FoliaLib foliaLib;
     private ResetTimer timer;
+    private PlayerListener playerListener;
     private volatile Map<UUID, Pirate> pirates = new ConcurrentHashMap<>();
 
     @Override
@@ -91,7 +96,8 @@ public class SeaOfSteves extends JavaPlugin {
         if (getDependencies().isPluginAvailable("MythicMobs")) {
             getServer().getPluginManager().registerEvents(new MythicListener(this), this);
         }
-        getServer().getPluginManager().registerEvents(new PlayerListener(this), this);
+        playerListener = new PlayerListener(this);
+        getServer().getPluginManager().registerEvents(playerListener, this);
         getServer().getPluginManager().registerEvents(new ProjectileListener(this), this);
 
         if (getDependencies().isPluginAvailable("PlaceholderAPI")){
@@ -104,16 +110,29 @@ public class SeaOfSteves extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        int count = 0;
+        int mythicCount = 0;
         if (getDependencies().isPluginAvailable("MythicMobs")) {
             for (final ActiveMob am : getDependencies().getMythicMobs().getMobManager().getActiveMobs()) {
                 if (WorldUtil.isAllowedWorld(am.getLocation().getWorld().getName())) {
                     am.despawn();
-                    count++;
+                    mythicCount++;
                 }
             }
         }
-        getLogger().info("Despawned " + count + " mythic mobs in allowed world(s)");
+        int sosCount = 0;
+        for (final World world : getServer().getWorlds()) {
+            if (!WorldUtil.isAllowedWorld(world.getName())) continue;
+            for (final Entity entity : world.getEntities()) {
+                final EntityType type = entity.getType();
+                if (type != EntityType.DOLPHIN && type != EntityType.BLAZE) continue;
+                if (NBTAPI.hasNBT(entity, "sos_boss") && playerListener != null) {
+                    playerListener.removeBossBar(entity.getUniqueId());
+                }
+                entity.remove();
+                sosCount++;
+            }
+        }
+        getLogger().info("Despawned " + mythicCount + " mythic mobs and " + sosCount + " boss entities in allowed world(s)");
     }
 
     public Dependencies getDependencies() {
@@ -145,6 +164,10 @@ public class SeaOfSteves extends JavaPlugin {
         chance.load();
         boss = new BossSettings(this);
         boss.load();
+    }
+
+    public PlayerListener getPlayerListener() {
+        return playerListener;
     }
 
     public FoliaLib getFoliaLib() {

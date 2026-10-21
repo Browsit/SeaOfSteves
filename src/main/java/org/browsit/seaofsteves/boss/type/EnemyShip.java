@@ -54,8 +54,8 @@ public class EnemyShip implements PirateBoss {
         loc.add(standardInverseDirectionVec);
         loc.setY(63.0); // Above ocean surface
         if (depends.getMythicMobs() != null
-                && !bosses.getKingBlazeMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
-            return MythicUtil.spawnMythicMobAtLocation(bosses.getKingBlazeMythic(), loc);
+                && !bosses.getEnemyShipMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
+            return MythicUtil.spawnMythicMobAtLocation(bosses.getEnemyShipMythic(), loc);
         } else {
             plugin.getFoliaLib().getScheduler().runAtEntityLater(target, () -> {
                 if (depends.getMythicMobs() != null && plugin.getConfigSettings().isVotsEnabled()) {

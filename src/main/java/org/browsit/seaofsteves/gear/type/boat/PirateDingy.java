@@ -11,6 +11,7 @@
 package org.browsit.seaofsteves.gear.type.boat;
 
 import org.browsit.seaofsteves.gear.PirateGear;
+import org.browsit.seaofsteves.listener.PlayerListener;
 import org.browsit.seaofsteves.util.ItemUtil;
 import org.browsit.seaofsteves.util.NBTAPI;
 import org.bukkit.Material;
@@ -35,7 +36,7 @@ public class PirateDingy implements PirateGear {
         }
         NBTAPI.addNBT(item, "sos_owner", player.getUniqueId().toString());
         NBTAPI.addNBT(item, "sos_world", player.getWorld().getUID().toString());
-        NBTAPI.addNBT(item, "sos_type", "Catamaran");
+        NBTAPI.addNBT(item, "sos_type", PlayerListener.VOTS_TYPE.getFirst());
         return item;
     }
 

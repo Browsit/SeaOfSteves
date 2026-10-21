@@ -68,9 +68,12 @@ public class ItemUtil {
         }
         final PlayerInventory inv = player.getInventory();
         final HashMap<Integer, ItemStack> leftovers = inv.addItem(item);
+        IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.GREEN + IO.getLang("treasureAdded")
+                .replace("<name>", item.getType().name()).replace("<amount>", String.valueOf(item.getAmount())));
         if (!leftovers.isEmpty()) {
             for (final ItemStack leftover : leftovers.values()) {
                 player.getWorld().dropItem(player.getLocation(), leftover);
+                IO.sendMessage(player, ChatMessageType.CHAT, ChatColor.RED + IO.getLang("treasureDropped"));
             }
         }
     }
@@ -205,7 +208,7 @@ public class ItemUtil {
                 continue;
             }
             // Special case
-            if (item.equals("VOTSAmmoCannonBall") && shipType.contains("Catamaran")) {
+            if (item.equals("VOTSAmmoCannonBall") && shipType.toLowerCase().contains("catamaran")) {
                 continue;
             }
             final ItemStack mythic = plugin.getDependencies().getMythicMobs().getItemManager().getItemStack(item);

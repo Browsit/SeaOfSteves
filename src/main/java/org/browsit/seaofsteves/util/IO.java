@@ -39,6 +39,16 @@ public class IO {
         if (file.exists()) {
             config = YamlConfiguration
                     .loadConfiguration(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
+            final InputStream resource = plugin.getResource(fileName);
+            if (resource != null) {
+                final FileConfiguration defaults = YamlConfiguration
+                        .loadConfiguration(new InputStreamReader(resource, StandardCharsets.UTF_8));
+                for (final String key : defaults.getKeys(true)) {
+                    if (!config.contains(key)) {
+                        config.set(key, defaults.get(key));
+                    }
+                }
+            }
         } else {
             final InputStream resource = plugin.getResource(fileName);
             if (resource != null) {

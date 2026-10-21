@@ -224,11 +224,11 @@ public class ProjectileListener implements Listener {
         if (config.isVotsEnabled() && plugin.getDependencies().getMythicMobs() != null) {
             boolean success = false;
             for (final Entity entity : projectile.getWorld().getNearbyEntities(projectile.getLocation(), 4, 4, 4,
-                    (entity) -> entity.getType() == EntityType.ZOMBIE)) {
+                    (entity) -> entity.getType() == EntityType.SKELETON)) {
                 // Ignore own ship
                 boolean ignore = false;
-                for (String names : config.getVotsShips()) {
-                    if (entity.getName().contains(names)) {
+                for (final String name : config.getVotsShips()) {
+                    if (entity.getName().contains(ChatColor.stripColor(name))) {
                         ignore = true;
                     }
                 }

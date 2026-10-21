@@ -35,8 +35,8 @@ public class Shark implements PirateBoss {
     private LivingEntity spawn() {
         LivingEntity le;
         if (depends.getMythicMobs() != null
-                && !bosses.getKingBlazeMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
-            le = MythicUtil.spawnMythicMobAtLocation(bosses.getKingBlazeMythic(), spawn);
+                && !bosses.getSharkMythic().equals("NAME_OF_MOB_TO_USE_INSTEAD")) {
+            le = MythicUtil.spawnMythicMobAtLocation(bosses.getSharkMythic(), spawn);
         } else {
             if (spawn.getWorld() == null) {
                 plugin.getLogger().severe("Null world on attempt to spawn shark");

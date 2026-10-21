@@ -18,6 +18,7 @@ public class ChanceSettings {
     private final SeaOfSteves plugin;
     private int oceanSpawnDrowned;
     private int oceanSpawnEnemyShip;
+    private int oceanSpawnMegalodon;
     private int islandSpawnSkeletonWithBow;
     private int islandSpawnCaptain;
     private int volcanoSpawnMagmaCube;
@@ -41,6 +42,14 @@ public class ChanceSettings {
 
     public void setOceanSpawnEnemyShip(final int oceanSpawnEnemyShip) {
         this.oceanSpawnEnemyShip = oceanSpawnEnemyShip;
+    }
+
+    public int getOceanSpawnMegalodon() {
+        return oceanSpawnMegalodon;
+    }
+
+    public void setOceanSpawnMegalodon(final int oceanSpawnMegalodon) {
+        this.oceanSpawnMegalodon = oceanSpawnMegalodon;
     }
 
     public int getIslandSpawnSkeletonWithBow() {
@@ -78,10 +87,11 @@ public class ChanceSettings {
     public void load() {
         final FileConfiguration cfg = IO.getChance();
         oceanSpawnDrowned = cfg.getInt("sos.ocean.spawn-drowned", 65);
-        oceanSpawnEnemyShip = cfg.getInt("sos.ocean.spawn-enemy-ship", 1000);
+        oceanSpawnEnemyShip = cfg.getInt("sos.ocean.spawn-enemy-ship", 1500);
+        oceanSpawnMegalodon = cfg.getInt("sos.ocean.spawn-megalodon", 4000);
         islandSpawnSkeletonWithBow = cfg.getInt("sos.ocean.spawn-skeleton-with-bow", 10);
         islandSpawnCaptain = cfg.getInt("sos.ocean.spawn-captain", 5);
         volcanoSpawnMagmaCube = cfg.getInt("sos.ocean.spawn-magma-cube", 40);
-        volcanoSpawnTephra = cfg.getInt("sos.ocean.spawn-tephra", 50);
+        volcanoSpawnTephra = cfg.getInt("sos.ocean.spawn-tephra", 90);
     }
 }

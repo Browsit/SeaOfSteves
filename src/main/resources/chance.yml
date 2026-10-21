@@ -3,6 +3,7 @@ sos:
   ocean:
     spawn-drowned: 65
     spawn-enemy-ship: 1500
+    spawn-megalodon: 4000
   island:
     spawn-skeleton-with-bow: 10
     spawn-captain: 5
